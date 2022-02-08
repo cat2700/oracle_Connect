@@ -1,4 +1,7 @@
-import conn 
-cn = conn.my_conn('arabank', 'icl', 'oracl2k')
-print(cn.open_connect())
-print(cn.close_connect())
+# import conn 
+import cx_Oracle
+
+connection = None
+ipp = '127.0.0.1' + '/' + 'oracl2k'
+connection = cx_Oracle.connect(user='arabank', password='icl' ,dsn=ipp)
+# print(connection.)

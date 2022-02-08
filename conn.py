@@ -5,29 +5,29 @@ class my_conn:
 
     connection = None
 
-    def __init__(self, uid, upsw, service_name, ip='127,0,0,1', port='1521', saved_dns_name='', new_dsn=False):
+    def __init__(self, uid, upsw, service_name='', ip='127.0.0.1', port='1521', saved_dns_name=''):
         self.user = uid
         self.passw = upsw
         self.service = service_name
         self.ip = ip
         self.port = port
         self.saved_dns_name = saved_dns_name
-        self.new_dsn = new_dsn
+        # self.new_dsn = new_dsn
 
     def open_connect(self):
         try:
-
-            if self.saved_dns_name == '' and not self.new_dsn:
+            if self.saved_dns_name == '':
+                dsn = self.ip + "/" + self.service
                 self.connection = cx_Oracle.connect(user=self.user, password=self.passw,
-                                                    dsn=self.ip + "/" + self.service)
-            elif self.saved_dns_name != '' and not self.new_dsn:
+                                                    dsn=dsn)
+            elif self.saved_dns_name != '':
                 self.connection = cx_Oracle.connect(user=self.user, password=self.passw, dsn=self.saved_dns_name,
                                                     encoding="UTF-8")
-            elif self.saved_dns_name == '' and self.new_dsn:
-                dsn = cx_Oracle.makedsn(
-                    self.ip, 1521, service_name=self.service)
-                self.connection = cx_Oracle.connect(user=self.user, password=self.passw, dsn=dsn,
-                                                    encoding="UTF-8")
+            # elif self.saved_dns_name == '' and self.new_dsn:
+            #     dsn = cx_Oracle.makedsn(
+            #         self.ip, 1521, service_name=self.service)
+            #     self.connection = cx_Oracle.connect(user=self.user, password=self.passw, dsn=dsn,
+            #                                         encoding="UTF-8")
             else:
                 return False
 
@@ -43,7 +43,7 @@ class my_conn:
             return False
 
 
-cn = my_conn('arabank', 'icl', 'oracl2k')
+cn = my_conn(uid='arabank', upsw='icl' ,saved_dns_name="oracl2k")
 print(cn.open_connect())
 print(cn.close_connect())
 
