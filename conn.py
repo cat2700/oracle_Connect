@@ -35,17 +35,31 @@ class my_conn:
         except BaseException as err:
             return False, err
 
-    def close_connect(selfe):
+    def close_connect(self):
         try:
             self.connection.close()
             return True
-        except:
-            return False
+        except BaseException as err:
+            return False, err
+
+    def runSQL(self, SQLst):
+        try:
+            if SQLst == '':
+                return False
+            else:
+                cursor = self.connection.cursor()
+                cursor.execute(SQLst)
+                for accountid in cursor:
+                    print("Values:", accountid)
+                return True
+        except BaseException as err:
+            return False, err
 
 
-cn = my_conn(uid='arabank', upsw='icl' ,saved_dns_name="oracl2k")
+cn = my_conn(uid='arabank', upsw='icl', saved_dns_name="oracl2k")
 print(cn.open_connect())
-print(cn.close_connect())
+# print(cn.close_connect())
+print(cn.runSQL("select accountid from temp_dep"))
 
 # cursor = connection.cursor()
 # print()
