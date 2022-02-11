@@ -1,9 +1,14 @@
 import cx_Oracle
+import threading
+import os
+import time
 
 
 class my_conn:
 
     connection = None
+    rows = []
+    rowsLen = 0
 
     def __init__(self, uid, upsw, service_name='', ip='127.0.0.1', port='1521', saved_dns_name=''):
         self.user = uid
@@ -42,24 +47,52 @@ class my_conn:
         except BaseException as err:
             return False, err
 
-    def runSQL(self, SQLst):
+    def runSQL(self, SQLst, values=[]):
         try:
             if SQLst == '':
                 return False
             else:
                 cursor = self.connection.cursor()
-                cursor.execute(SQLst)
-                for accountid in cursor:
-                    print("Values:", accountid)
-                return True
+                if SQLst.lstrip().lower()[:2] in ('se'):
+                    cursor.execute(SQLst)
+                    self.rows = cursor.fetchall()
+                    self.rowsLen = len(self.rows)
+                elif SQLst.lstrip().lower()[:2] in ('in', 'de'):
+                    if len(values) > 0:
+                        cursor.executemany(SQLst, values)
+                    else:
+                        cursor.execute(SQLst)
+                    self.connection.commit()
+                return True, self.rowsLen, self.rows
         except BaseException as err:
             return False, err
 
+    def backUPme(self):
+        try:
 
-cn = my_conn(uid='arabank', upsw='icl', saved_dns_name="oracl2k")
-print(cn.open_connect())
-# print(cn.close_connect())
-print(cn.runSQL("select accountid from temp_dep"))
+            savePath = "F:\\BK\\"
+            global bak_command
+            bak_command = f'exp {self.user}/{self.passw} file={savePath}'
+
+            def orclbk():
+                now = time.strftime('%Y-%m-%d %H:%M:%S')
+                command = bak_command + now + '.dmp'  # + tables
+                print(command)
+                if os.system(command) == 0:
+                    print('BackUP successful')
+                else:
+                    print('BackUP failed')
+
+            t = threading.Timer(2.0, orclbk)
+            t.start()
+
+        except BaseException as err:
+            return False, err
+
+# cn = my_conn(uid='arabank', upsw='icl', saved_dns_name="oracl2k")
+# print(cn.open_connect())
+# # print(cn.close_connect())
+# print(cn.runSQL("select accountid from temp_dep"))
 
 # cursor = connection.cursor()
 # print()

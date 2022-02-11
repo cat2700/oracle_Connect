@@ -1,0 +1,969 @@
+#   Start With Learning Python
+###########################################
+##      Referance Web Sites
+##              https://pyformat.info/
+##
+##
+###########################################
+
+# type()    =>> to show the type of the variable
+---------------
+=>> Variables::
+
+    int=integer => print(type(100))
+    float=float => print(type(1.9))
+    str=string  => print(type("Hello"))
+    bool=boolean    => print(type(2 == 3))
+    list=list       => print(type([ 1 ,33 ,9]))
+    tuple=tuple     => print(type(( 1 ,33 ,9)))
+    dict=dictionry  => print(type({ "one":1 ,"tow":2 ,"three":3}))
+
+=>> Syntax::    
+    [VariableName] [Operator] [Value]
+        >> x = 100                      >> print(x)
+        >> a ,b ,c = 4 , "Hello" ,9     >> print(b)
+=>> Escap Character::
+    \b  > Back Space    
+            print("Haithamm\bMaged")
+    \   > Escap new line
+            print("I \
+            Love \
+            Programing")
+    \\  > Escap Back Space
+            print("my name \\ Haitham")
+    \'  > Escap single quats
+            print('my name \'haitham\'')
+    \"  > Escap double quats
+            print("my name \"haitham\"")
+    \n  > line feed
+            print("i love \n Programing")
+    \t  > tab feed
+            print("Haitham \t Maged")
+=>> Concat::
+        x = "Hello"
+        z = "World"
+        y = x + " " + z
+        print(y)
+=>> string::
+                x = "my name 'Haitham'"
+                z = 'my name "Haitham"'
+        > Indexing and slicing:-
+                        x = "i love python"
+                        print(x[0]) 
+                        print(x[-1])
+                        print(x[-6])
+                        print(x[2:6])
+                        print(x[:6])
+                        print(x[2:])
+                        print(x[2:6:1])
+                        print(x[2:6:2])
+        > Methods:-
+                >< strip() , rstrip() ,lstrip()
+                        z = "  @ I Love Programing    @"
+                        print(z.strip())
+                        print(z.lstrip())
+                        print(z.rstrip("@"))
+                >< title() ,capitalize() ,upper() ,lower()
+                        w = "i Love my 2d screen"
+                        print(w.title())
+                        print(w.capitalize())
+                        print(w.upper())
+                        print(w.lower())
+                >< zfill()
+                        a , b , c = "2" ,"46" ,"360"
+                        print(a.zfill(3))
+                        print(b.zfill(3))
+                        print(c.zfill(3))
+                >< split() ,rsplit()
+                        v = "i love python and c#"
+                        print(v.split())
+                        v = "i-love-python-and-c#"
+                        print(v.split())
+                        print(v.split("-"))
+                        print(v.split("-",2))
+                        print(v.rsplit("-",2))
+                >< center() ,ljust() ,rjust()
+                        v = "Haitham"
+                        print(v.center(7))
+                        print(v.center(9))
+                        print(v.center(9,"-"))
+                        print(v.center(11,"-"))
+                        print(v.ljust(9))
+                        print(v.ljust(9 ,"#"))
+                        print(v.rjust(9))
+                        print(v.rjust(9 ,"#"))
+                >< count()
+                        v = "i love python and c# because python is easy"
+                        print(v.count("python"))
+                        print(v.count("Python"))
+                        print(v.count("python" , 0 ,15 ))
+                >< swapcase()
+                        c = "I Love Python"
+                        print(c.swapcase())
+                >< startswith() ,endswith()
+                        c = "I Love Python"
+                        print(c.startswith("i"))
+                        print(c.startswith("I"))
+                        print(c.startswith("P",7,12))
+                        print(c.endswith("N"))
+                        print(c.endswith("e",2,6))
+                >< find()
+                        c = "I Love Python"
+                        print(c.find("P"))
+                        print(c.find("P" ,0 ,10))
+                        print(c.find("P" ,0 ,5))
+                >< splitlines()
+                        y = """ Haitham
+                        Maged
+                        Elkot """
+                        print(y.splitlines())
+                        y="Haitham\nMaged\nElkot"
+                        print(y.splitlines())
+                >< istitle() ,isspace() ,islower() ,isidentfier() ,isalpha() ,isalnum()
+                >< replace()
+                        a = "Hello A , b ,A ,C ,S ,A ,B"
+                        print(a.replace("A","X"))
+                        print(a.replace("A","X",1))
+                        print(a.replace("A","X",2))
+                >< join()
+                        a = ["Haitham" ,"Maged" ,"elkot"]
+                        print("-".join(a))
+                        print(" ".join(a))
+                >< Formating [Old Ver]
+                        print("My Name is :" + "Haitham" ) 
+                        print("My Name is :" + name ) 
+                        # print("My Name is :" + name + " And my Age is: " + age) # =>>   Error TypeError: must be str, not int
+                        print("My Name is : %s" % name)
+                        print("My Name is : %s And my Age is: %d And my degree is: %.3f" % (name,age,degree))
+                        print("My Name is : %.7s" % name)
+                >< Formating [New ver]
+                        name = "Haitham Elkot"
+                        age = 40
+                        degree = 7.5
+                        money = 5732388765
+                        a ,b ,c = 1 ,"two" ,3.5
+                        print("My Name is :" + "Haitham" ) 
+                        print("My Name is :" + name ) 
+                        # print("My Name is :" + name + " And my Age is: " + age) # =>>   Error TypeError: must be str, not int
+                        print("My Name is : {}".format(name))
+                        print("My Name is : {:s} And my Age is:{:d} And my degree is: {:.3f}".format(name,age,degree))
+                        print("My Name is : {:.7s}".format(name))
+                        print("My money is : {:,d}".format(money))
+                        print("My team is {} {} {}".format(a,b,c))
+                        print("My team is {2} {0} {1}".format(a,b,c))
+                        print("My team is {0:d} {1:.2s} {2:.3f}".format(a,b,c))
+                >< Formating [in 3.6+ ver]
+                        name = "Haitham Elkot"
+                        age = 40
+                        print("My Name is {name} and my age is {age}")
+                        print(f"My Name is {name} and my age is {age}")
+=>> numbers::
+        > integer 
+                0
+                200
+                -10
+        > float
+                6.7
+                0.44
+                -2.9
+        > complex
+                x = 5+3j
+                print(type(x))
+                print(x.real)
+                print(x.imag)
+        > Convering
+                x = 500
+                print(float(x))
+                print(complex(x))
+                x = 5.9
+                print(int(x))
+                print(complex(x))
+                x = 7+2j
+                # print(int(x))         >> Error
+                # print(float(x))       >> Error
+        Math operators:
+                >< [+] ,[-] ,[*] ,[/]
+                >< [%]
+                        print(8 % 2) <<>> 0
+                        print(9 % 2) <<>> 1
+                >< [**]
+                        print(2 ** 5) <<>> 2*2*2*2*2 <<>> 32
+                >< [//]
+                        print(100 // 20) <<>> 5
+                        print(110 // 20) <<>> 5
+                        print(120 // 20) <<>> 6
+                        print(125 // 20) <<>> 6
+=>> Lists::
+        > intro:
+                L = ["one" ,"A" ,4.55 ,"F" ,-2 ,"A" ,"Last" ,"Elkot" ,100]
+                print(L)        #['one', 'A', 4.55, 'F', -2, 'A', 'Last', 'Elkot', 100]
+                print(L[2])     # 4,55
+                print(L[-1])    # 100
+                print(L[3:7])   # ['F', -2, 'A', 'Last']
+                print(L[:7])    # ['one', 'A', 4.55, 'F', -2, 'A', 'Last']
+                print(L[::2])   # ['one', 4.55, -2, 'Last', 100]
+                L[0] = True
+                print(L)        # [True, 'A', 4.55, 'F', -2, 'A', 'Last', 'Elkot', 100]
+                L[1:4] = []
+                print(L)        # [True, -2, 'A', 'Last', 'Elkot', 100]  
+                L[0:3] = ["Payhon"]
+                print(L)        # ['Payhon', 'Last', 'Elkot', 100]
+                L[1:4] = ["C#" ,"JS" ,"mySQL"]
+                print(L)        # ['Payhon', 'C#', 'JS', 'mySQL']
+        > Methods:
+                >> Append :
+                        L1 = ["A" ,"B" ,"C"]
+                        print(L1)               # ['A', 'B', 'C']
+                        L1.append("D")
+                        L1.append(True)
+                        L1.append(100)
+                        print(L1)               # ['A', 'B', 'C', 'D', True, 100]
+                        L2 = ["X" ,"Y" ,"Z"]
+                        print(L2)               # ['X', 'Y', 'Z']
+                        L1.append(L2)
+                        print(L1)               # ['A', 'B', 'C', 'D', True, 100, ['X', 'Y', 'Z']]
+                        print(L1[1])            # B
+                        print(L1[6])            # ['X', 'Y', 'Z']
+                        print(L1[6][0])         # X
+                >> extend :
+                        a = [1 ,2 ,3]
+                        b = ["A" ,"B" ,"C"]
+                        a.extend(b)
+                        print(a)        # [1, 2, 3, 'A', 'B', 'C']
+                        c = [True ,False]
+                        a.extend(c)
+                        
+                        print(a)        # [1, 2, 3, 'A', 'B', 'C', True, False]
+                > remove :
+                        a = ["A" ,"haitham" ,"maged" ,"A"]
+                        a.remove("A")
+                        print(a)        # ['haitham', 'maged', 'A']
+                > sort :
+                        a = [-10 ,33 ,120]
+                        a.sort()
+                        print(a)        # [-10, 33, 120]
+                        a.sort(reverse=True)
+                        print(a)        # [120, 33, -10]
+                > reverse :
+                        a = [-10 ,33 ,120 , "A" ,False ,100]
+                        a.reverse()
+                        print(a)        # [100, False, 'A', 120, 33, -10]
+                > clear :
+                        a = ["A" ,"B" ,"C"]
+                        a.clear()
+                        print(a)        # []
+                > copy :
+                        a = ["A" ,"B" ,"C"]
+                        b = a.copy()
+                        print(a)        # ['A', 'B', 'C']
+                        print(b)        # ['A', 'B', 'C']
+                > count :
+                        a = ["A" ,"B" ,"A" ,"X" ,"A"]
+                        print(a.count("A"))        # 3
+                > index :
+                        a = ["A" ,"B" ,"A" ,"X" ,"A"]
+                        print(a.index("A"))        # 0
+                > insert :
+                        o = ["haitham" ,"Elkot"]
+                        o.insert(0,"khadija")
+                        print(o)        # ['khadija', 'haitham', 'Elkot']
+                        o.insert(-1,"Maged")
+                        print(o)        # ['khadija', 'haitham', 'Maged', 'Elkot']
+                > pop :
+                        o = ['khadija', 'haitham', 'Maged', 'ElKotk']
+                        print(o.pop(3)) # ElKotk
+                        print(o)        # ['khadija', 'haitham', 'Maged']
+tuple ::
+        Syntax >
+                t1 = (1,2,3,4)
+                print(t1)			# (1, 2, 3, 4)
+                t2 = "a","b","c"
+                print(t2)			#('a', 'b', 'c')
+                print(t2[2])		        # c
+        Cant remove or editing >
+                t2[2] = "three"		# object does not support item assignment
+        Methods >
+                >< Concat :
+                        t1 = (1,2,3,4)
+                        t2 = "a","b","c"
+                        t = t1 + t2
+                        print(t)	# (1, 2, 3, 4, 'a', 'b', 'c')
+                >< repeat :
+                        t = (1,2,3)
+                        L = ["a","b","c"]
+                        s = "haitham"
+                        print(t * 3)		# (1, 2, 3, 1, 2, 3, 1, 2, 3)
+                        print(L * 3)		# ['a', 'b', 'c', 'a', 'b', 'c', 'a', 'b', 'c']
+                        print(s * 3)		# haithamhaithamhaitham
+                >< count :
+                        t = (1 ,2 ,1 ,3)
+                        print(t.count(1)) 	# 2
+                >< index :
+                        t = (1 ,2 ,1 ,3)
+                        print("the index is : {}".format(t.index(2)))	# the index is : 1
+                        print(f"the index is : {t.index(2)}")           #" the index is : 1
+                >< Destruct :(VIP)
+                        t = (1 ,2 ,3)
+                        a , b , c = t
+                        print(a)    # 1
+                        print(b)    # 2
+                        print(c)    # 3
+                        t = (1 ,2 ,True ,4)
+                        a , b , c = t # error too many values to unpack (expected 3)
+                        a , b , _, c = t
+                        print(a)    # 1
+                        print(b)    # 2
+                        print(c)    # 4
+Set ::
+        Syntax >
+                s = {"a" ,True ,500}
+                print(s)                # {'a', True, 500}
+                print(s)                # {True, 'a', 500}
+                # print(s[0])           # 'set' object does not support indexing
+                # print(s[1:2])         #'set' object is not subscriptable
+                s = {"A" ,"B" ,"A" ,"B"}
+                print(s)                # {'B', 'A'}
+        Methods >
+                ==> clear :
+                        s = {"a" ,True ,500}
+                        s.clear()
+                        print(s)    # set() 
+                ==> union :
+                        s1 = {"a" ,True ,500}
+                        s2 = {1 ,2 ,3}
+                        s3 = {5.5 ,False}
+                        print(s1 | s2)          # {'a', True, 2, 500, 3}
+                        print(s1.union(s2,s3))  # {False, True, 2, 3, 500, 5.5, 'a'}
+                ==> add :
+                        s = {"a" ,True ,500}
+                        s.add(5.7)
+                        print(s)          # {True, 5.7, 500, 'a'}
+                ==> copy :
+                        s = {"a" ,True ,500}
+                        r = s.copy()
+                        print(s)            # {True, 'a', 500}
+                        print(r)            # {True, 'a', 500}
+                ==> remove & discard :
+                        s = {1 ,2 ,3 ,4}
+                        s.remove(1)
+                        print(s)            # {2, 3, 4}
+                        # s.remove(7)       # error
+                        s.discard(2)
+                        print(s)            # {3, 4}
+                        s.discard(7)        
+                        print(s)            # {3, 4}
+                ==> pop :
+                        s = {1 ,False ,"D" ,4}
+                        print(s.pop())      # False
+                        print(s)            # {1, 'D', 4}
+                ==> update :
+                        s = {1 ,False ,"D" ,4}
+                        r = {1 ,2 ,3}
+                        s.update(r)
+                        print(s)            # {False, 1, 'D', 2, 4, 3}
+                ==> difference :
+                        s = {1 ,2 ,3 ,4}
+                        r = {1 ,2 ,3}
+                        print(s)                # {1, 2, 3, 4}
+                        print(s.difference(r))  # {4}
+                        print(s)                # {1, 2, 3, 4}
+                ==> difference_update :
+                        s = {1 ,2 ,3 ,4}
+                        r = {1 ,2 ,3 ,True}
+                        print(s)                # {1, 2, 3, 4}
+                        s.difference_update(r)
+                        print(s)                # {4}
+                ==> intersection :
+                        s = {1 ,2 ,3 ,4}
+                        r = {"1" ,"2" ,3}
+                        print(s)                    # {1, 2, 3, 4}
+                        print(s.intersection(r))    # {3}
+                        print(s)                    # {1, 2, 3, 4}
+                ==> intersection_update :
+                        s = {1 ,2 ,3 ,4}
+                        r = {"1" ,"2" ,3}
+                        print(s)                    # {1, 2, 3, 4}
+                        s.intersection_update(r)
+                        print(s)                    # {3}
+                ==> symmetric_difference :
+                        s = {1 ,2 ,3 ,4 ,"X"}
+                        r = {"Haitham" ,"M" ,1 ,2}
+                        print(s)                            # {1, 2, 3, 4, 'X'}
+                        print(s.symmetric_difference(r))    # {3, 4, 'M', 'Haitham', 'X'}
+                        print(s)                            # {1, 2, 3, 4, 'X'}
+                ==> symmetric_difference_update :
+                        s = {1 ,2 ,3 ,4 ,"X"}
+                        r = {"Haitham" ,"M" ,1 ,2}
+                        print(s)                            # {1, 2, 3, 4, 'X'}
+                        s.symmetric_difference_update(r)    
+                        print(s)                            # {3, 4, 'Haitham', 'M', 'X'}
+                ==> issubset ,issuperset :
+                        s = {1 ,2}
+                        r = {1 ,2 ,3 ,4}
+                        print(s.issubset(r))        # True
+                        print(s.issuperset(r))      # False     
+                ==> isdisjoint :
+                        s = {1 ,2}
+                        r = {1 ,2 ,3 ,4}
+                        u = {50 , 700 ,490}
+                        print(s.isdisjoint(r))          # False
+                        print(s.isdisjoint(u))          # True 
+Dictionry ::
+        > syntax :
+                dic = {
+                        "name" : "Haitham",
+                        "age": 37,
+                        "skills": ["C#", "python" ,"VB.net"],
+                        12 : 55.77
+                }
+                print(dic)              # {'name': 'Haitham', 'age': 37, 'skills': ['C#', 'python', 'VB.net'], 12: 55.77}
+                print(dic["name"])      # Haitham
+                print(dic.get("age"))   # 37
+                print(dic.keys())       # dict_keys(['name', 'age', 'skills', 12])
+                print(dic.values())     # dict_values(['Haitham', 37, ['C#', 'python', 'VB.net'], 55.77])
+        > tow-dimentional:
+                dic = {
+                        "name" : "Haitham",
+                        "age": 37,
+                        "skills": ["C#", "python" ,"VB.net"],
+                        12 : 55.77,
+                        "lang1": {"name" : "CSS","progress": "44%"},
+                        "lang2": {"name": "JS","progress": "50%"}
+                }
+                print(dic)                      # {'name': 'Haitham', 'age': 37, 'skills': ['C#', 'python', 'VB.net'], 12: 55.77, 'lang1': {'name': 'CSS', 'progress': '44%'}, 'lang2': {'name': 'JS', 'progress': '50%'}}
+                print(dic["lang1"])             # {'name': 'CSS', 'progress': '44%'}
+                print(dic["lang2"]["name"])     # JS
+                print(dic.keys())               # dict_keys(['name', 'age', 'skills', 12, 'lang1', 'lang2'])
+                print(dic.values())             # dict_values(['Haitham', 37, ['C#', 'python', 'VB.net'], 55.77, {'name': 'CSS', 'progress': '44%'}, {'name': 'JS', 'progress': '50%'}])
+        > length :
+                print(len(dic))                 # 6
+                print(len(dic["lang2"]))        # 2
+        > Methods :
+                >< clear :
+                        dic = { "name" : "Haitham","age": 37}
+                        print(dic)  # {'name': 'Haitham', 'age': 37}
+                        dic.clear()
+                        print(dic)  # {}
+                >< update :
+                        dic = { "name" : "Haitham"}
+                        print(dic)          # {'name': 'Haitham'}
+                        dic["age"] = 37
+                        print(dic)          # {'name': 'Haitham', 'age': 37}
+                        dic.update({"country": "Egypt", "tall": 163})
+                        print(dic)          # {'name': 'Haitham', 'age': 37, 'country': 'Egypt', 'tall': 163}
+                >< copy :
+                        dic = { "name" : "Haitham"}
+
+                        print(dic)          # {'name': 'Haitham'}
+                        dd = dic.copy()
+                        print(dd)           # {'name': 'Haitham'}
+                >< setdefault :
+                        dic = { "name" : "Haitham"}
+
+                        print(dic)                              # {'name': 'Haitham'}
+                        print(dic.setdefault("name", "Osama"))  # Haitham
+                        print(dic)                              # {'name': 'Haitham'}
+                        print(dic.setdefault("age", 37))        # 37
+                        print(dic)                              # {'name': 'Haitham', 'age': 37}
+                >< popitem :
+                        dic = {'name': 'Haitham', 'age': 37}
+
+                        print(dic)                              # {'name': 'Haitham', 'age': 37}
+                        print(dic.popitem())                    # ('age', 37)
+                        print(dic)                              # {'name': 'Haitham'}
+                >< items (VIP):
+                        dic = {'name': 'Haitham', 'age': 37}
+
+                        dic2 = dic.items()
+                        print(dic)                  # {'name': 'Haitham', 'age': 37} 
+                        print(dic2)                 # dict_items([('name', 'Haitham'), ('age', 37)])
+                        
+                        dic["tall"] = "160cm"
+                        print(dic)                  # {'name': 'Haitham', 'age': 37, 'tall': '160cm'}
+                        print(dic2)                 # dict_items([('name', 'Haitham'), ('age', 37), ('tall', '160cm')])
+                >< fromkeys:
+                        o = ('name', 'age' ,'tall')
+                        p = 'ZZZ'
+                        
+                        print(dict.fromkeys(o,p))   # {'name': 'ZZZ', 'age': 'ZZZ', 'tall': 'ZZZ'}
+boolean ::
+                > intro :
+                        print(100 < 20)     # False
+                        # true Values
+                        print(bool(True))
+                        print(bool(1))
+                        print(bool('cat'))
+                        print(bool((1,2,3)))
+                        print(bool([1,2,3]))
+                        print(bool({1:'A'}))
+                        # false Values
+                        print(bool(False))
+                        print(bool(0))
+                        print(bool(''))
+                        print(bool(()))
+                        print(bool([]))
+                        print(bool({}))
+                        print(bool(None))
+                > operators (and , or not):
+                        age = 37
+                        country = 'eg'
+                        rank = 10
+                        print(age > 30 and country == 'eg' and rank == 10)  # true
+                        print(age > 40 and country == 'eg' and rank == 10)  # false
+                        print(age > 40 or country == 'eg' or rank == 30)    # true
+                        print(age > 40 or country == 'ksa' and rank == 30)  # false
+                        print(not age > 30)                                 # false
+                        print(not country == 'ksa' )                        # true
+                > assignment Operator (=, +=, -=, *=, **=, /=, //=, %=):
+                        x = 10
+                        y = 5
+                        x += y
+                        print(x)        # 15
+                > comparison Operator (==, !=, >, >=, <, <=):
+                        x = 100
+                        y = 500
+                        
+                        print(x == y)   # false
+                        print(x != y)   # true
+                        print(x > y)    # false
+                        print(x < y)    # true
+type conversion ::
+                        >< str :
+                                a = 600                                         ## Integer
+                                b = 'Haitham'                                   ## String
+                                c = (1 ,2 ,3)                                   ## tuple
+                                d = ["A", "B" ,"C"]                             ## List
+                                e = {True, 'Maged', 3.7}                        ## Set
+                                f = {"One": 140, "Tow": 3300, "three": 5000}    ## Dictionary
+                                
+                                print(str(a))       # 600
+                                print(str(b))       # Haitham
+                                print(str(c))       # (1, 2, 3)
+                                print(str(d))       # ['A', 'B', 'C']
+                                print(str(e))       # {'Maged', True, 3.7}
+                                print(str(f))       # {'One': 140, 'Tow': 3300, 'three': 5000}
+                        >< tuple :
+                                # print(tuple(a))       # 'int' object is not iterable
+                                print(tuple(b))       # ('H', 'a', 'i', 't', 'h', 'a', 'm')
+                                print(tuple(c))       # (1, 2, 3)
+                                print(tuple(d))       # ('A', 'B', 'C')
+                                print(tuple(e))       # (True, 3.7, 'Maged')
+                                print(tuple(f))       # ('One', 'Tow', 'three')
+                        >< list :
+                                # print(list(a))       # 'int' object is not iterable
+                                print(list(b))       # ['H', 'a', 'i', 't', 'h', 'a', 'm']
+                                print(list(c))       # [1, 2, 3]
+                                print(list(d))       # ['A', 'B', 'C']
+                                print(list(e))       # [True, 'Maged', 3.7]
+                                print(list(f))       # ['One', 'Tow', 'three']
+                        >< set :
+                                # print(set(a))       # 'int' object is not iterable
+                                print(set(b))       # {'a', 'H', 'h', 'm', 'i', 't'}
+                                print(set(c))       # {1, 2, 3}
+                                print(set(d))       # {'A', 'C', 'B'}
+                                print(set(e))       # {True, 'Maged', 3.7}
+                                print(set(f))       # {'three', 'One', 'Tow'}
+                        >< dict :
+                                a = 600                                         ## Integer
+                                b = 'Haitham'                                   ## String
+                                c = (('A',1) ,('B',2))                          ## tuple
+                                d = [['one',29] , ['tow',80]]                   ## List
+                                # e = {{'A',5} , {'B',66}}                      ## Set
+                                
+                                # print(dict(a))       # 'int' object is not iterable
+                                # print(dict(b))       # dictionary update sequence element #0 has length 1; 2 is required
+                                print(dict(c))       # {'A': 1, 'B': 2}
+                                print(dict(d))       # {'one': 29, 'tow': 80}
+                                # print(dict(e))       # unhashable type: 'set'
+User Input ::
+                fname = input('what\'s your First name ?' )
+                mname = input('what\'s your Middle name ?' )
+                lname = input('what\'s your Last name ?' )
+                fname = fname.strip().capitalize()
+                mname = mname.strip().capitalize()
+                lname = lname.strip().capitalize()
+                print(f"Welcome {fname} {mname:.1s} {lname} Nice To Meet You !!!")
+                ===
+                fname = input('what\'s your name ?' ).strip().capitalize()
+                email = input('what\'s your Email ?' ).strip()
+                ename = email[0:email.index("@")]
+                edomain = email[email.index("@") + 1:]
+                print(f'Welcome {fname}\nAnd Yoor Username IS:{ename} \nAnd Your Domain IS:{edomain}')
+
+if ,else ,elif ::
+                        > short syntax >
+                                x = 40
+                                print("U Rate Is Good" if x >= 50 else "U Rate Is Bad")
+                        > Long syntax >
+                                print(">" * 80)
+                                print(" U Can Enter One Letter ".center(80, ">"))
+                                print(">" * 80)
+                                age = int(input("Please Enter U Age: ").strip())
+                                unit = input("Choose U Favorit Unit Month, Week Or Day: ").strip().lower()
+                                m = age * 12
+                                w = m * 4
+                                d = age * 365
+                                if unit == 'month' or unit == 'm':
+                                print(f"U R Age Is {age} and\nU R Age In Monthes is {m}")
+                                elif unit == 'week' or unit == 'w':
+                                print(f"U R Age Is {age} and\nU R Age In Weeks is {w}")
+                                else:
+                                print(f"U R Age Is {age} and\nU R Age In Daies is {d}")
+Membership operators (in ,not in)::
+                                l1 = ['eg', 'ksa', 'syr']
+                                d1 = 50
+                                l2 = ['usa', 'uae']
+                                d2 = 20
+                                mycountry = 'ua'
+                                if mycountry in l1:
+                                print(f'U R Discound is : {d1}')
+                                elif mycountry in l2:
+                                print(f'U R Discound is : {d2}')
+                                elif mycountry not in l1 and mycountry not in l2:
+                                print('U R not Have Discound')
+Big Example ::
+                                admins = ['majed', 'haitham', 'khadija']
+                                name = input("Enter Your Name Please : ").strip().lower()
+                                if name in admins:
+                                        print('Welcome Back !!!')
+                                        option = input(
+                                                'Do You Want To Update Or Delete Your Name? ').strip().lower()
+                                if option == 'update' or option == 'u':
+                                        newname = input("Please Enter Your New Name: ").strip().lower()
+                                        admins[admins.index(name)] = newname
+                                        print('Your Name Is Updated!!!')
+                                        print(admins)
+                                elif option == 'delete' or option == 'd':
+                                        admins.remove(name)
+                                        print("Your Name Is Deleted")
+                                        print(admins)
+                                else:
+                                        option = input(
+                                                'Do You Want To Add Your Name? Y or N ').strip().lower()
+                                if option == 'yes' or option == 'y':
+                                        admins.append(name)
+                                        print('Yoour Name Is Added')
+                                        print(admins)
+                                else:
+                                        print('It\'s Ok')
+Loops ::
+                > while (else ,break ,containue):
+                        webs = []
+                        print(len(webs))
+                        while len(webs) < 5:
+                                ad = input("Enter Your Websit: ").strip().lower()
+                                webs.append(ad)
+                                print(f'Your Web List now Contain {len(webs)}')
+                        else:
+                                webs.sort()
+                                print(webs)
+                > for (else ,break ,containue ,pass):
+                        person = {
+                                "Ahmed": {
+                                        'HTML': '20%',
+                                        'CSS': '60%',
+                                        'JS': '10%'
+                                },
+                                "Ali": {
+                                        'HTML': '30%',
+                                        'CSS': '90%',
+                                        'JS': '100%'
+                                }
+                        }
+                        for p in person:
+                                print(f'Mr: {p} Has Skills:')
+                                for s in person[p]:
+                                        print(f"{s} has Progress => {person[p][s]}")
+                        # ==========
+                        for main_key, main_value in person.items():
+                                print(f"the person is:: {main_key}")
+                                for child_key, child_vales in main_value.items():
+                                        print(f"-- {child_key} ==> {child_vales}")
+                        # ============
+                        p = [1, 2, 5, 7, 8]
+                        for i in p:
+                                if i == 2:
+                                        pass    # to ignore the if block code
+                                print(i)    # 1 2 5 7 8
+Function ::
+                def showSkills(name, *skils):
+                        print(f'Hello Mr: {name} Your Skills Is:: ')
+                        for s in skils:
+                                print(f"-- {s}")
+                showSkills('Haitham', 'C#', 'vb.net')
+                showSkills('Osama', 'PHP', 'mySQL', 'Python', 'JS')
+                # =================
+                def Myskills(**skills):
+                        for main_key, main_value in skills.items():
+                                print(f"the skill {main_key} proress is : {main_value}")
+                Myskills(HTML="30%", CSS="55%", JS="70%")
+                print("=" * 30)
+                d1 = {
+                "C#": "80%",
+                "VB.net": "77%",
+                "PHP": "55%",
+                "MySQL": "99%"
+                }
+                Myskills(**d1)
+                # ======================
+                def Myskills(name, *skills, **skills_progress):
+                        print(f'Welcome Mr: {name} \nYour Skills Is :')
+                        for s in skills:
+                                print(f'-- {s}')
+                        for main_key, main_value in skills_progress.items():
+                                print(f"-{main_key} ==> {main_value}")
+
+                Myskills('Haitham')
+                Myskills('Haitham', 'win95', 'Mac')
+                Myskills('Haitham', 'win95', 'Mac', HTML="30%", CSS="55%", JS="70%")
+                tuble = ("WinServer", 'Win-10', 'Linux')
+                d1 = {
+                        "C#": "80%",
+                        "VB.net": "77%",
+                        "PHP": "55%",
+                        "MySQL": "99%"
+                }
+                Myskills('Majed')
+                Myskills('Majed', *tuble)
+                Myskills('Majed', **d1)
+                Myskills('Majed', *tuble, **d1)
+                # ===============
+        > EX [VIP] :
+                
+                def clearW(word):
+                        if len(word) == 1:
+                                return word
+                        if word[0] == word[1]:
+                                return clearW(word[1:])
+                        else:
+                                return word[0] + clearW(word[1:])
+        > lambda :
+                def say_hi(name, age):
+                        return f"Hello MR: {name} Your Age is : {age}"
+                print(say_hi('majed', '37'))    # Hello MR: majed Your Age is : 37
+        
+                par = lambda name, age : f"Hello MR: {name} Your Age is : {age}"
+                print(par('majed' ,'37'))       # Hello MR: majed Your Age is : 37
+Files ::
+        > OS <<>>
+                print(os.getcwd())                                  # D:\Learn Python
+                print(os.path.abspath(__file__))                    # d:\Learn Python\test.py
+                print(os.path.dirname(os.path.abspath(__file__)))   # d:\Learn Python
+                os.chdir("D:\\temp")
+                print(os.getcwd())                                  # D:\temp
+                f = open("tst.txt")
+        > read Files >
+                rf = open(r"D:\Learn Python\tst.txt", 'r')
+                # <_io.TextIOWrapper name='D:\\Learn Python\\tst.txt' mode='r' encoding='cp1252'>
+                # print(rf)
+                # print(rf.mode)                      # r
+                # print(rf.name)                      # D:\Learn Python\tst.txt
+                # print(rf.encoding)                  # cp1252
+                
+                # print(rf.read())                  # haitham maged elkot 123
+                # print(rf.read(7))                 # haitham
+                
+                # print(rf.readline())              # haitham maged
+                # print(rf.readline())              # elkot
+                # print(rf.readline(7))             # haitham
+                
+                # print(rf.readlines())             # ['haitham maged\n', 'elkot\n', '123\n']
+                # print(type(rf.readlines()))       # <class 'list'>
+                # print(rf.readlines(7))            # ['haitham maged\n']
+                
+                # for i in rf:
+                #     print(i)
+                #     if i.startswith("e"):
+                #         break
+
+                f.seek(4)
+                print(f.read())
+     
+                rf.close()
+        > write - append >
+                # write mode 'w' will create file if isnt exist or remove and create is exist
+                # f = open(r"D:\Learn Python\tst.txt", 'w')
+                # f.write("Welcome to write mode\n")
+                # f.write('i will remove all words to add me')
+                # f.write('H A I T H A M\n' * 1000)
+                # myList = ['miga\n', 'khadija\n', 'farida\n']
+                # f.writelines(myList)
+
+                # append mode 'a' will open file to append text to it
+                f = open(r"D:\Learn Python\tst.txt", 'a')
+                # f.write("Welcome to append\n\n\n")
+                # f.write('hai there')
+                # f.truncate(7)
+                # print(f.tell())
+                f.close()
+
+Built in Function ::
+                > all()
+                        x = [1, 2, 5]
+                        if all(x):
+                                print("All Is True")
+                        else:
+                                print('Found one at least is false')
+                > any()
+                        x = [0, False, []]
+                        if any(x):
+                                print("found on element is true")
+                        else:
+                                print('not found any true')
+                > bin()
+                        print(bin(377)) # 0b101111001        
+                > id()
+                        a = 122
+                        b = 'cat'
+                        print(id(a))  # 1629452832
+                        print(id(b))  # 2273345895872
+                > sum()
+                        a = [20, 30, 10, 5]
+                        print(sum(a))   # 65
+                        print(sum(a, 7))    # 72
+                > round()
+                        print(round(10.452))    # 10
+                        print(round(10.502))    # 11
+                        print(round(10.456, 2))  # 10.46
+                        print(round(10.452, 2))  # 10.45
+                > range()
+                        print(list(range(10)))  # [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+                        print(list(range(5, 15)))   # [5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+                        print(list(range(0)))       # []
+                        print(list(range(3, 21, 2)))    # [3, 5, 7, 9, 11, 13, 15, 17, 19]
+                > print()
+                        print('Hello', 'Haitham', 'Maged', 'ElKot')  # Hello Haitham Maged ElKot
+                        print('Hello', 'Haitham', 'Maged', 'ElKot', sep='_-_') # Hello_-_Haitham_-_Maged_-_ElKot
+                        
+                        print('Hello', end='-_-')   # Hello-_-Haitham
+                        print('Haitham')
+                        print('Elkot')              # Elkot
+                > abs()
+                        print(abs(100))     # 100
+                        print(abs(-100))    # 100
+                > pow()
+                        print(pow(2,3))     # 8
+                        print(pow(2,3,3))   # 2
+                > min()
+                        print(min(30 ,2 ,378))              # 2
+                        print(min('mazen' ,'B' ,'xx'))      # B
+                        p = [20 ,1 ,-200]
+                        print(min(p))                       # -200
+                > max()
+                        print(max(30 ,2 ,378))              # 378
+                        print(max('mazen' ,'B' ,'xx'))      # xx
+                        p = [20 ,1 ,-200]
+                        print(max(p))                       # 20
+                > slice()
+                        myl = ['a' ,'b' ,'c' ,'d' ,'e' ,'f'] 
+                        print(myl[:5])                      # ['a', 'b', 'c', 'd', 'e']
+                        print(myl[slice(5)])                # ['a', 'b', 'c', 'd', 'e']
+                        print(myl[slice(2,6,2)])            # ['c', 'e']
+                > map(VIP)
+                        def myForm(text):
+                                return f"==> {text.strip().lower()} ::"
+                        print(myForm('  HAiTham  '))    # ==> haitham ::
+                        names = ['  HAiTham ', ' MAged  ', 'ELkoT ']
+                        ooo = map(myForm, names)
+                        print(ooo)                      # <map object at 0x000002305AF3BF70>
+                        for i in ooo:
+                                print(i)
+                                                        # ==> haitham ::
+                                                        # ==> maged ::
+                                                        # ==> elkot ::
+                        for x in map(myForm, names):
+                                print(x)
+                                                        # ==> haitham ::
+                                                        # ==> maged ::
+                                                        # ==> elkot ::
+                        for z in map((lambda text: f"==> {text.strip().lower()} ::"), names):
+                                print(z)
+                                                        /"# ==> haitham ::
+                                                        # ==> maged ::
+                                                        ## ==> elkot ::
+                > filter(VIP)
+                        def myForm(text):
+                                return text.strip().lower().startswith('o')     # return True OR False
+                        print(myForm('  HAiTham  '))                            # False
+                        print(myForm('  Osama  '))                              # True
+                        names = ['  HAiTham ', ' Osama  ', 'ELkoT ', 'Omar']
+                        ooo = filter(myForm, names)
+                        print(ooo)                                              # <filter object at 0x000002092070BE20>
+                        for i in ooo:
+                                print(i)
+                                                                                #  Osama
+                                                                                # Omar
+                        for x in filter(myForm, names):
+                                print(x)
+                                                                                #  Osama
+                                                                                # Omar
+                        for z in filter((lambda text: text.strip().lower().startswith('o')), names):
+                                print(z)
+                                                                                #  Osama
+                                                                                # Omar
+                > reduce()
+                        from functools import reduce
+
+                        def sumtome(sum1, sum2):
+                                return sum1 + sum2
+                        
+                        print(sumtome(20, 66))                      # 86
+                        l1 = [3, 7, 100, 50]
+                        print(reduce(sumtome, l1))                  # 160
+                        print(reduce(lambda n1, n2: n1+n2, l1))     # 160
+                > enumerate()
+                        skills = ['mysql', 'c#', 'vb.net']
+                        for i in skills:
+                                print(f'{i}')
+                                # mysql
+                                # c#
+                                # vb.net
+                        myskills = enumerate(skills, 10)
+                        for i in myskills:
+                                print(f'{i}')
+                                # (10, 'mysql')
+                                # (11, 'c#')
+                                # (12, 'vb.net')
+                        for x, y in myskills:
+                                print(f"{x} ==> {y}")
+                                # 10 ==> mysql
+                                # 11 ==> c#
+                                # 12 ==> vb.net
+                help()
+                        print(help(print))
+                                # print(...)
+                                # print(value, ..., sep=' ', end='\n', file=sys.stdout, flush=False)
+                reverse()
+                        nam = 'HaithaM'
+                        myname = reversed(nam)
+                        
+                        skills = ['mysql', 'c#', 'vb.net']
+                        rsk = reversed(skills)
+                        
+                        for i in myname:
+                                print(f'{i}', end='')
+                                # MahtiaH
+                        print('\n', '=' * 30)
+                        for i in rsk:
+                                print(f'{i}')
+                                # vb.net
+                                # c#
+                                # mysql        
+Modules ::
+                intro =>
+                        # from random import random, randint
+
+                        # print(random())  # 0.7670549961560588
+
+                        import random
+
+                        print(random.random())  # 0.121871259428315
+
+                        # to show all functions into the module
+                        print(dir(random))
+                        # ['BPF', 'LOG4', 'NV_MAGICCONST', 'RECIP_BPF', 'Random', 'SG_MAGICCONST', 'SystemRandom', 'TWOPI', '_Sequence',
+                        # '_Set', '__all__', '__builtins__', '__cached__', '__doc__', '__file__', '__loader__', '__name__', '__package__', '__spec__', '_accumulate', '_acos', '_bisect', '_ceil', '_cos', '_e', '_exp', '_floor', '_inst', '_log', '_os', '_pi', '_random', '_repeat', '_sha512', '_sin', '_sqrt', '_test', '_test_generator', '_urandom', '_warn', 'betavariate', 'choice', 'choices', 'expovariate', 'gammavariate', 'gauss',
+                        # 'getrandbits', 'getstate', 'lognormvariate', 'normalvariate', 'paretovariate', 'randbytes', 'randint', 'random', 'randrange', 'sample', 'seed', 'setstate', 'shuffle', 'triangular', 'uniform', 'vonmisesvariate', 'weibullvariate']
+=============================================================================
+Numpy ::
+                                                                                                                                                
