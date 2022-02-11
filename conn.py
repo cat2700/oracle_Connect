@@ -80,16 +80,16 @@ class my_conn:
             self.open_connect()
             savePath = save_Path
             global bak_command
-            bak_command = f'exp {self.user}/{self.passw} file={savePath}'
+            bak_command = f'expdp {self.user}/{self.passw}@{self.service} directory=TEST_DIR dumpfile={savePath}'
 
             def orclbk():
-                now = time.strftime('%Y-%m-%d %H:%M:%S')
+                now = time.strftime('%Y-%m-%d-%H-%M-%S')
                 command = bak_command + now + '.dmp'  # + tables
                 print(command)
-                # if os.system(command) == 0:
-                #     print('BackUP successful')
-                # else:
-                #     print('BackUP failed')
+                if os.system(command) == 0:
+                    print('BackUP successful')
+                else:
+                    print('BackUP failed')
 
             t = threading.Timer(2.0, orclbk)
             t.start()

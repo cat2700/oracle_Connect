@@ -2,7 +2,7 @@ import conn
 
 
 cn = conn.my_conn(uid='arabank', upsw='icl', service_name="oracl2k")
-# print(cn.open_connect())
+print(cn.open_connect())
 # print(cn.close_connect())
 # rs = list(cn.runSQL("select * from temp_dep"))
 # rs = list(cn.runSQL("insert into TEMP values ('2','حامد محمد')"))
@@ -17,4 +17,4 @@ cn = conn.my_conn(uid='arabank', upsw='icl', service_name="oracl2k")
 # for o in rs[2]:
 #     print(o[:2])
 
-cn.backUPme(save_Path=r"D:\Temp\backups")
+cn.backUPme(save_Path="D:\\Temp\\backups\\")
