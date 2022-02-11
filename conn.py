@@ -39,6 +39,8 @@ class my_conn:
             return True
         except BaseException as err:
             return False, err
+        finally:
+            self.close_connect()
 
     def close_connect(self):
         try:
@@ -52,6 +54,7 @@ class my_conn:
             if SQLst == '':
                 return False
             else:
+                self.open_connect()
                 cursor = self.connection.cursor()
                 if SQLst.lstrip().lower()[:2] in ('se'):
                     cursor.execute(SQLst)
@@ -66,11 +69,16 @@ class my_conn:
                 return True, self.rowsLen, self.rows
         except BaseException as err:
             return False, err
+        finally:
+            self.close_connect()
 
-    def backUPme(self):
+    def backUPme(self, save_Path):
         try:
-
-            savePath = "F:\\BK\\"
+            if save_Path == '':
+                print("Please Enter The Path")
+                return False
+            self.open_connect()
+            savePath = save_Path
             global bak_command
             bak_command = f'exp {self.user}/{self.passw} file={savePath}'
 
@@ -78,16 +86,18 @@ class my_conn:
                 now = time.strftime('%Y-%m-%d %H:%M:%S')
                 command = bak_command + now + '.dmp'  # + tables
                 print(command)
-                if os.system(command) == 0:
-                    print('BackUP successful')
-                else:
-                    print('BackUP failed')
+                # if os.system(command) == 0:
+                #     print('BackUP successful')
+                # else:
+                #     print('BackUP failed')
 
             t = threading.Timer(2.0, orclbk)
             t.start()
 
         except BaseException as err:
             return False, err
+        finally:
+            self.close_connect()
 
 # cn = my_conn(uid='arabank', upsw='icl', saved_dns_name="oracl2k")
 # print(cn.open_connect())
