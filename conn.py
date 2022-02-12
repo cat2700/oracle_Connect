@@ -1,6 +1,7 @@
 import cx_Oracle
 import threading
 import os
+import subprocess
 import time
 
 
@@ -72,24 +73,130 @@ class my_conn:
         finally:
             self.close_connect()
 
-    def backUPme(self, save_Path):
+    def backupORRestore(self, isBackup=False, isrestore=False, restoreFile=''):
         try:
-            if save_Path == '':
-                print("Please Enter The Path")
+            if not self.open_connect() or (not isBackup and not isrestore) or (isrestore and restoreFile == ''):
                 return False
-            self.open_connect()
-            savePath = save_Path
-            global bak_command
-            bak_command = f'expdp {self.user}/{self.passw}@{self.service} directory=TEST_DIR dumpfile={savePath}'
+            savePath = os.getcwd()+'\\'
+
+            print('starting whith my current Dir.' + savePath)
+
+            def adminOrder():
+                def run_sqlplus(sqlplus_script):
+                    """
+                    Run a sql command or group of commands against
+                    a database using sqlplus.
+                    """
+
+                    p = subprocess.Popen(['sqlplus', '/nolog'], stdin=subprocess.PIPE,
+                                         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                    (stdout, stderr) = p.communicate(
+                        sqlplus_script.encode('utf-8'))
+                    stdout_lines = stdout.decode('utf-8').split("\n")
+
+                    return stdout_lines
+
+                sqlplus_script = f"""
+                        CONN / AS SYSDBA 
+                        ALTER USER {self.user} IDENTIFIED BY {self.passw} ACCOUNT UNLOCK;
+                        CREATE OR REPLACE DIRECTORY tst_dir AS '{savePath}';
+                        GRANT READ, WRITE ON DIRECTORY tst_dir TO  {self.user};
+                        exit
+                    """
+
+                sqlplus_output = run_sqlplus(sqlplus_script)
+
+                for line in sqlplus_output:
+                    print(line)
+
+            t = threading.Timer(2.0, adminOrder)
+            t.start()
+            t._wait_for_tstate_lock()
+
+            global base_command
+            if isBackup:        # Backup
+                base_command = f'expdp {self.user}/{self.passw}@{self.service} full=Y directory=tst_dir dumpfile='
+                FN = time.strftime('%Y-%m-%d-%H-%M-%S')
+
+            elif isrestore:     # Restore
+                # Drop User and create again
+                def run_sqlplus(sqlplus_script):
+                    """
+                    Run a sql command or group of commands against
+                    a database using sqlplus.
+                    """
+
+                    p = subprocess.Popen(['sqlplus', '/nolog'], stdin=subprocess.PIPE,
+                                         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                    (stdout, stderr) = p.communicate(
+                        sqlplus_script.encode('utf-8'))
+                    stdout_lines = stdout.decode('utf-8').split("\n")
+
+                    return stdout_lines
+
+                sqlplus_script = f"""
+                        CONN / AS SYSDBA
+                        drop user {self.user} cascade; 
+                        create user {self.user} identified by {self.passw} default tablespace;
+                        cra_dbs temporary tablespace temp quota unlimited on cra_dbs;
+                        grant create table to {self.user} ;
+                        grant create trigger to {self.user} ;
+                        grant create procedure to {self.user} ;
+                        grant create sequence to {self.user} ;
+                        grant create session to {self.user} ;
+                        grant dba to {self.user};
+                        alter user {self.user} quota unlimited on lon_dbs ;
+                        alter user {self.user} quota unlimited on lon_idx ;
+                        alter user {self.user} quota unlimited on cnv_dbs ;
+                        alter user {self.user} quota unlimited on cnv_idx ;
+                        alter user {self.user} quota unlimited on dep_dbs ;
+                        alter user {self.user} quota unlimited on dep_idx ;
+                        alter user {self.user} quota unlimited on cra_idx ;
+                        alter user {self.user} quota unlimited on crt_idx ;
+                        alter user {self.user} quota unlimited on crt_dbs ;
+                        alter user {self.user} quota unlimited on tlr_dbs ;
+                        alter user {self.user} quota unlimited on tlr_idx ;
+                        alter user {self.user} quota unlimited on sig_dbs ;
+                        alter user {self.user} quota unlimited on sig_idx ;
+                        alter user {self.user} quota unlimited on gnl_dbs ;
+                        alter user {self.user} quota unlimited on gnl_idx ;
+                        alter user {self.user} quota unlimited on ilc_dbs ;
+                        alter user {self.user} quota unlimited on ilc_idx ;
+                        alter user {self.user} quota unlimited on cbl_dbs ;
+                        alter user {self.user} quota unlimited on cbl_idx ;
+                        alter user {self.user} quota unlimited on lgr_dbs ;
+                        alter user {self.user} quota unlimited on lgr_idx ;
+                        alter user {self.user} quota unlimited on col_dbs ;
+                        alter user {self.user} quota unlimited on col_idx ;
+                        alter user {self.user} quota unlimited on clr_dbs ;
+                        alter user {self.user} quota unlimited on clr_idx ;
+                        alter user {self.user} quota unlimited on gds_dbs ;
+                        alter user {self.user} quota unlimited on gds_idx ;
+                        alter user {self.user} quota unlimited on cmf_dbs ;
+                        alter user {self.user} quota unlimited on cmf_idx ;
+                        alter user {self.user} quota unlimited on lot_dbs ;
+                        alter user {self.user} quota unlimited on lot_idx ;
+                        alter user {self.user} quota unlimited on fst_dbs ;
+                        alter user {self.user} quota unlimited on fst_idx ;
+                        alter user {self.user} quota unlimited on bdg_dbs ;
+                        alter user {self.user} quota unlimited on bdg_idx ;
+                    """
+
+                sqlplus_output = run_sqlplus(sqlplus_script)
+
+                for line in sqlplus_output:
+                    print(line)
+
+                base_command = f'impdp {self.user}/{self.passw}@{self.service} full=Y directory=tst_dir dumpfile='
+                FN = restoreFile
 
             def orclbk():
-                now = time.strftime('%Y-%m-%d-%H-%M-%S')
-                command = bak_command + now + '.dmp'  # + tables
+                command = base_command + FN + '.dmp'  # + 'logfile=expdpSCOTT.log'
                 print(command)
                 if os.system(command) == 0:
-                    print('BackUP successful')
+                    print('successful')
                 else:
-                    print('BackUP failed')
+                    print('failed')
 
             t = threading.Timer(2.0, orclbk)
             t.start()
@@ -98,6 +205,7 @@ class my_conn:
             return False, err
         finally:
             self.close_connect()
+
 
 # cn = my_conn(uid='arabank', upsw='icl', saved_dns_name="oracl2k")
 # print(cn.open_connect())
@@ -118,3 +226,4 @@ class my_conn:
 # for fname, lname in cursor:
 #     print("Values:", fname, lname)
 # connection.close()
+# print(os.getcwd()+'\\')

@@ -17,4 +17,4 @@ print(cn.open_connect())
 # for o in rs[2]:
 #     print(o[:2])
 
-cn.backUPme(save_Path="D:\\Temp\\backups\\")
+cn.backupORRestore(isrestore=True, restoreFile='bk')
