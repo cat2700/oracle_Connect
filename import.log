@@ -1,0 +1,8 @@
+;;; 
+Import: Release 12.2.0.1.0 - Production on Thu Feb 17 20:11:26 2022
+
+Copyright (c) 1982, 2017, Oracle and/or its affiliates.  All rights reserved.
+;;; 
+Connected to: Oracle Database 12c Enterprise Edition Release 12.2.0.1.0 - 64bit Production
+ORA-39000: bad dump file specification
+ORA-39143: dump file "C:\Users\admin\Desktop\oracle_Connect\all-16-02-2022.dmp" may be an original export dump file
