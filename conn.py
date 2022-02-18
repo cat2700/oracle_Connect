@@ -137,8 +137,8 @@ class my_conn:
                     #     --cra_dbs temporary tablespace temp quota unlimited on cra_dbs;
                 print('O'*50)
 
-                        # Shutdown immediate;
-                        # startup restrict;
+                # Shutdown immediate;
+                # startup restrict;
                 sqlplus_script = f"""
                         conn / AS SYSDBA
                         drop user {self.user} cascade; 
@@ -217,26 +217,89 @@ class my_conn:
         finally:
             self.close_connect()
 
-# end
+    def convertToXML(self, sFil):
 
+        dfSource = pn.read_excel(sFil)
 
-# cn = my_conn(uid='arabank', upsw='icl', saved_dns_name="oracl2k")
-# print(cn.open_connect())
-# # print(cn.close_connect())
-# print(cn.runSQL("select accountid from temp_dep"))
+        print(dfSource)
+        print(len(dfSource))
+        print(dfSource.fillna(value=''))
 
-# cursor = connection.cursor()
-# print()
-# cursor = connection.cursor()
-# cursor.execute("""
-#         SELECT first_name, last_name
-#         FROM employees
-#         WHERE department_id = :did AND employee_id > :eid""",
-#         did = 50,
-#         eid = 190)
-# sql = 'select b.branch_no,b.bal_acc_no from arabank.bal_cr_tab b where b.cus_no=64328   and b.branch_no=919002000'
-# cursor.execute(sql)
-# for fname, lname in cursor:
-#     print("Values:", fname, lname)
-# connection.close()
-# print(os.getcwd()+'\\')
+        colList = ['CUS_CIVIL_NO', 'a', 'b', 'CUS_NAM_L', 'c', 'CUS_BIRTHDAY',
+                   'BIRTH_GOV_COD', 'CBE_GENDER', 'ID_GOV_COD', 'CBE_NATIONAL_ALPHA']
+        mapList = ['nationalId', 'secondaryId', 'secondaryIdType', 'arabicName', 'englishName',
+                   'birthDate', 'birthGovCode', 'gender', 'residenceGovCode', 'nationality']
+        rowlabel = ['customers', 'customer']
+
+        filter = dfSource.loc[:, colList].fillna(
+            value='').to_numpy().astype(str)
+
+        print(filter)
+        print(type(filter))
+
+        row = ''
+        allRows = ''
+        # ['28807241402556' 'احمد جابرعليوه سالم ضيف' '19880724']
+        for u in filter:    # catch rows
+            x = 0
+            row = ''
+            # ['nationalId' ,'arabicName' ,'birthDate']
+            for c in mapList:   # catch columns
+                row += f'<{c}>' + u[x] + f'</{c}>'
+                x += 1
+
+            row = f'<{rowlabel[1]}>' + row + f'</{rowlabel[1]}>'
+            allRows += row
+
+        parent = f'<{rowlabel[0]}>' + allRows + f'</{rowlabel[0]}>'
+
+        # create header
+        bankCode = r'<bankCode>8201</bankCode>'
+        date = r'<month>' + dt.today().strftime("%Y%m") + r'</month>'
+        count = r'<noOfCustomers>' + \
+            str(len(dfSource)) + r'</noOfCustomers>'
+
+        head = f'<header>' + bankCode + date + count + f'</header>'
+
+        # create body
+        body = r'<document xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">' + \
+            head + parent + r'</document>'
+
+        # create all file
+        uniCode = r'<?xml version="1.0" encoding="utf-8"?>' + body
+
+        print(uniCode)
+        print(type(uniCode))
+        # formating
+        x = et.XML(uniCode)
+        et.indent(x)
+        pretty_xml = et.tostring(x, encoding='utf8')
+        # return
+        # ucode = uniCode.encode("utf8")
+        rrr = rn.randint(10000, 99999)
+        pyFile = open(f'{rrr}.xml', 'wb')
+        pyFile.write(pretty_xml)
+        pyFile.close()
+
+    # end
+
+    # cn = my_conn(uid='arabank', upsw='icl', saved_dns_name="oracl2k")
+    # print(cn.open_connect())
+    # # print(cn.close_connect())
+    # print(cn.runSQL("select accountid from temp_dep"))
+
+    # cursor = connection.cursor()
+    # print()
+    # cursor = connection.cursor()
+    # cursor.execute("""
+    #         SELECT first_name, last_name
+    #         FROM employees
+    #         WHERE department_id = :did AND employee_id > :eid""",
+    #         did = 50,
+    #         eid = 190)
+    # sql = 'select b.branch_no,b.bal_acc_no from arabank.bal_cr_tab b where b.cus_no=64328   and b.branch_no=919002000'
+    # cursor.execute(sql)
+    # for fname, lname in cursor:
+    #     print("Values:", fname, lname)
+    # connection.close()
+    # print(os.getcwd()+'\\')
