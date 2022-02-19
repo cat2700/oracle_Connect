@@ -3,6 +3,13 @@ import threading
 import os
 import subprocess
 import time
+import pandas as pn
+import numpy as np
+import random as rn
+from datetime import date as dt
+import xml.etree.cElementTree as et
+from os.path import isfile, join
+from os import listdir
 
 
 class my_conn:
@@ -217,89 +224,146 @@ class my_conn:
         finally:
             self.close_connect()
 
-    def convertToXML(self, sFil):
+    def convertToXML(self, fromEx=False, filePathName='', sheetName=0, colList=[], maxRowsNum=0, GetAll=False):
 
-        dfSource = pn.read_excel(sFil)
-
-        print(dfSource)
-        print(len(dfSource))
-        print(dfSource.fillna(value=''))
-
-        colList = ['CUS_CIVIL_NO', 'a', 'b', 'CUS_NAM_L', 'c', 'CUS_BIRTHDAY',
-                   'BIRTH_GOV_COD', 'CBE_GENDER', 'ID_GOV_COD', 'CBE_NATIONAL_ALPHA']
+        # ==> Tags
+        unicodeTAG = r'<?xml version="1.0" encoding="utf-8"?>'
+        docTAG = [r'<document xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">', r'</document>']
+        headerTAG = [r'<header>', r'</header>', r'<bankCode>8201</bankCode>',
+                     r'<month>' + dt.today().strftime("%Y%m") + r'</month>',
+                     r'<noOfCustomers>', r'</noOfCustomers>']
         mapList = ['nationalId', 'secondaryId', 'secondaryIdType', 'arabicName', 'englishName',
                    'birthDate', 'birthGovCode', 'gender', 'residenceGovCode', 'nationality']
         rowlabel = ['customers', 'customer']
 
-        filter = dfSource.loc[:, colList].fillna(
-            value='').to_numpy().astype(str)
+        # ==> getAllExcelFiles
 
-        print(filter)
-        print(type(filter))
+        def getAllExcFiles(exten=('xls', 'xlsx')):
+            fils = []
+            mypath = os.curdir
+            for f in listdir(mypath):
+                if isfile(join(mypath, f)) and f.endswith(exten):
+                    fils.append(f.split("."))
+            return fils
 
-        row = ''
-        allRows = ''
-        # ['28807241402556' 'احمد جابرعليوه سالم ضيف' '19880724']
-        for u in filter:    # catch rows
-            x = 0
-            row = ''
-            # ['nationalId' ,'arabicName' ,'birthDate']
-            for c in mapList:   # catch columns
-                row += f'<{c}>' + u[x] + f'</{c}>'
+        # ==> export data from excel file
+        def ExpExl():
+
+            dfSource = pn.read_excel(
+                filePathName, sheet_name=sheetName, usecols=colList, dtype=str, skiprows=range(1, 175000))  # skiprows=range(1, 175000)
+            # Rows Count
+            rc = len(dfSource)
+
+            # print(dfSource)
+            # print(type(dfSource))
+            # print(len(dfSource))
+            # print(dfSource.fillna(value=''))
+
+            filter = dfSource.loc[:, colList].fillna(
+                value='').to_numpy().astype(str)
+
+            # print(filter)
+            # print(type(filter))
+
+            return filter, rc
+
+        # ==> deviding data
+        def devid_Data(df):
+            circle = int((rc // maxRowsNum) + 1)
+            net = int(rc % maxRowsNum)
+            x = 1
+            f, t = 0, maxRowsNum
+            while x <= circle:
+                if x < circle:
+                    t = maxRowsNum * x
+                else:
+                    t += net
+                exportXML(df[f:t])
+                f = t
                 x += 1
 
-            row = f'<{rowlabel[1]}>' + row + f'</{rowlabel[1]}>'
-            allRows += row
+        # ==> Import data to XML file
+        def exportXML(Data):
+            row = ''
+            baseData = ''
+            for Da in Data:  # ==> loop rows
+                x = 0
+                row = ''
+                for c in mapList:  # ==> loop columns
+                    row += f'<{c}>' + Da[x] + f'</{c}>'
+                    x += 1
 
-        parent = f'<{rowlabel[0]}>' + allRows + f'</{rowlabel[0]}>'
+                row = f'<{rowlabel[1]}>' + row + f'</{rowlabel[1]}>'
+                baseData += row
 
-        # create header
-        bankCode = r'<bankCode>8201</bankCode>'
-        date = r'<month>' + dt.today().strftime("%Y%m") + r'</month>'
-        count = r'<noOfCustomers>' + \
-            str(len(dfSource)) + r'</noOfCustomers>'
+            parent = f'<{rowlabel[0]}>' + baseData + f'</{rowlabel[0]}>'
 
-        head = f'<header>' + bankCode + date + count + f'</header>'
+            # ==> create header
+            count = f'{headerTAG[4]}' + str(len(Data)) + f'{headerTAG[5]}'
+            head = f'{headerTAG[0]}' + f'{headerTAG[2]}' + \
+                f'{headerTAG[3]}' + count + f'{headerTAG[1]}'
 
-        # create body
-        body = r'<document xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">' + \
-            head + parent + r'</document>'
+            # ==> create doc
+            doc = f'{docTAG[0]}' + head + parent + f'{docTAG[1]}'
+            # print(doc)
 
-        # create all file
-        uniCode = r'<?xml version="1.0" encoding="utf-8"?>' + body
+            # ==> create all file
+            xmlFile = f'{unicodeTAG}' + doc
 
-        print(uniCode)
-        print(type(uniCode))
-        # formating
-        x = et.XML(uniCode)
-        et.indent(x)
-        pretty_xml = et.tostring(x, encoding='utf8')
-        # return
-        # ucode = uniCode.encode("utf8")
-        rrr = rn.randint(10000, 99999)
-        pyFile = open(f'{rrr}.xml', 'wb')
-        pyFile.write(pretty_xml)
-        pyFile.close()
+            # print(xmlFile)
+            # print(type(xmlFile))
+            # ==> formating
+            x = et.XML(xmlFile)
+            et.indent(x)
+            pretty_xml = et.tostring(
+                x, encoding='utf8', short_empty_elements=False)
+            # return
+            # ucode = xmlFile.encode("utf8")
+            rrr = rn.randint(10000, 99999)
+            pyFile = open(f'{rrr}.xml', 'wb')
+            pyFile.write(pretty_xml)
+            pyFile.close()
 
-    # end
+        # ====================================================
+        # ==> Start run coding ::
+        # ====================================================
 
-    # cn = my_conn(uid='arabank', upsw='icl', saved_dns_name="oracl2k")
-    # print(cn.open_connect())
-    # # print(cn.close_connect())
-    # print(cn.runSQL("select accountid from temp_dep"))
+        # ==> Extract from excel
+        if fromEx and len(colList) == len(mapList):
+            # ==> define one file or more
+            if GetAll and filePathName == '':
+                fils = getAllExcFiles()
+                for fi in fils:
+                    print(fi[0] + '.' + fi[1])
+            else:
+                temp = ExpExl()
+                df, rc = temp[0], temp[1]
 
-    # cursor = connection.cursor()
-    # print()
-    # cursor = connection.cursor()
-    # cursor.execute("""
-    #         SELECT first_name, last_name
-    #         FROM employees
-    #         WHERE department_id = :did AND employee_id > :eid""",
-    #         did = 50,
-    #         eid = 190)
-    # sql = 'select b.branch_no,b.bal_acc_no from arabank.bal_cr_tab b where b.cus_no=64328   and b.branch_no=919002000'
-    # cursor.execute(sql)
-    # for fname, lname in cursor:
-    #     print("Values:", fname, lname)
-    # connection.close()
-    # print(os.getcwd()+'\\')
+                # ==> set rows before export xml
+                if (rc <= maxRowsNum and maxRowsNum == 0) or maxRowsNum == 0:
+                    exportXML(df)
+                else:
+                    devid_Data(df)
+                    
+                    # endv
+
+                    # cn = my_conn(uid='arabank', upsw='icl', saved_dns_name="oracl2k")
+                    # print(cn.open_connect())
+                    # # print(cn.close_connect())
+                    # print(cn.runSQL("select accountid from temp_dep"))
+
+                    # cursor = connection.cursor()
+                    # print()
+                    # cursor = connection.cursor()
+                    # cursor.execute("""
+                    #         SELECT first_name, last_name
+                    #         FROM employees
+                    #         WHERE department_id = :did AND employee_id > :eid""",
+                    #         did = 50,
+                    #         eid = 190)
+                    # sql = 'select b.branch_no,b.bal_acc_no from arabank.bal_cr_tab b where b.cus_no=64328   and b.branch_no=919002000'
+                    # cursor.execute(sql)
+                    # for fname, lname in cursor:
+                    #     print("Values:", fname, lname)
+                    # connection.close()
+                    # print(os.getcwd()+'\\')
