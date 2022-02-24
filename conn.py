@@ -11,6 +11,7 @@ import xml.etree.ElementTree as et
 from os.path import isfile, join
 from os import listdir
 # from xml.dom.minidom import parseString
+from datetime import datetime
 
 
 class my_conn:
@@ -381,14 +382,20 @@ class my_conn:
                         temp = ExpExl(F)
                         df, rc = temp[0], temp[1]
                         temp2 = preExportXML(df, rc)
-                        for d in temp2:
-                            exportXML(d, fi[0].lower())
+                        if maxRowsNum == 0:
+                            exportXML(temp2, fi[0].lower())
+                        else:
+                            for d in temp2:
+                                exportXML(d, fi[0].lower())
                 else:
                     temp = ExpExl(spl[-1])
                     df, rc = temp[0], temp[1]
                     temp2 = preExportXML(df, rc)
-                    for d in temp2:
-                        exportXML(d, spl[-1].split('.')[0].lower())
+                    if maxRowsNum == 0:
+                        exportXML(temp2, spl[-1].split('.')[0].lower())
+                    else:
+                        for d in temp2:
+                            exportXML(d, spl[-1].split('.')[0].lower())
 
         elif fromOrcl and sql != '':
             ExpOrcl()

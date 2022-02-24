@@ -1,5 +1,7 @@
 
 import conn
+# from datetime import datetime
+import datetime
 
 
 cn = conn.my_conn(uid='arabank', upsw='icl', service_name="oracl2k")
@@ -45,7 +47,7 @@ print(cn.open_connect())
 #                 maxRowsNum=0)
 
 
-# cn.convertToXML(kind_Exc='acc', fromEx=True, filePathName=r'*',
+# cn.convertToXML(kind='acc', fromEx=True, filePathName=r'DEP all.xlsx',
 #                 colList=['ACCOUNTID', 'TYPEID', 'CURRENCYID', 'BRANCHID', 'ISJOINT', 'OPENINGDATE',
 #                          'NATIONALID', 'SECONDARYID', 'SECONDARYIDTYPE', 'CLOSINGDATE', 'STATUSID', 'STATUSREASON'],
 #                 maxRowsNum=0)
@@ -64,6 +66,32 @@ sql = """
  from customer_tab_good_sh_1_22 sh,cbe_gender@abe_31102021,cbe_national@abe_31102021
  where sh.cus_sex = cbe_gender.abe_gendera
  and sh.cus_nationalt = cbe_national.cbe_national_code
-  and BRANCH_NO=910004000
+  and BRANCH_NO=910004000 and id_gov_cod=0
 """
-cn.convertToXML(kind='cust', fromOrcl=True, sql=sql)
+
+rs = list(cn.runSQL(sql))
+# print(rs)
+# # return
+# print(list(rs[2]))
+# print(type(rs[2]))
+da = rs[2]
+# print(da)
+# n = rs[2][0][1]
+# # nn = datetime.strptime(str(n), r"%Y-%m-%d %H:%M:%S").date()
+# # print(nn)
+# # print(rs[1])
+for indx, item in enumerate(da):
+    da[indx] = list(da[indx])
+# print(da)
+
+nt = type(None)
+# dt = type(datetime.datetime)
+for o in da:
+    for indx, item in enumerate(o):
+        if type(item) is nt:
+            o[indx] = ''
+        elif isinstance(item, datetime.datetime):
+            o[indx] = datetime.datetime.strptime(str(item), r"%Y-%m-%d %H:%M:%S").date()
+
+print(da)
+# cn.convertToXML(kind='cust', fromOrcl=True, sql=sql)
