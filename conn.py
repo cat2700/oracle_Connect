@@ -225,15 +225,15 @@ class my_conn:
         finally:
             self.close_connect()
 
-    def convertToXML(self, kind='', fromOrcl=False, fromEx=False, filePathName='', sheetName=0, colList=[], sql='', maxRowsNum=0):
+    def convertToXML(self, kind='', fromOrcl=False, fromEx=False,  filePathName='', sheetName=0, colList=[], sql='', maxRowsNum=0):
 
         def ExpOrcl():
             rs = self.runSQL(sql)
             if not rs[0]:
                 return False
 
-            filter = rs[2]
             rc = rs[1]
+            filter = rs[2]
             print(type(filter))
             print(filter)
 
@@ -345,8 +345,6 @@ class my_conn:
         # ====================================================
         # ==> Start run coding ::
         # ====================================================
-        # ==> store filePathName as a list
-        spl = list(filePathName.split('\\'))
         # ==> kind should be in [cust  or acc or card]
         if kind.strip().lower() == 'cust':
             rowlabel = ['Customers', 'Customer']
@@ -359,58 +357,39 @@ class my_conn:
         elif kind.strip().lower() == 'card':
             rowlabel = ['Cards', 'Card']
         else:
-            print(r'Should add right Kinf Attr.')
+            print('please kind attr. required')
             return
 
         # ==> Tags
         unicodeTAG = r'<?xml version="1.0" encoding="utf-8"?>'
-        docTAG = [r'<document xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">', r'</document>']
+        docTAG = [
+            r'<document xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">', r'</document>']
         headerTAG = [r'<header>', r'</header>', r'<bankCode>8201</bankCode>',
                      r'<month>' + dt.today().strftime("%Y%m") + r'</month>',
                      f'<noOf{rowlabel[0]}>', f'</noOf{rowlabel[0]}>']
 
-        # ==> Extract from excel
-        if fromEx and len(colList) == len(mapList):
-            # ==> define one file or more
-            if spl[-1] == '*':
-                fils = getAllExcFiles()
-                for fi in fils:
-                    F = fi[0] + '.' + fi[1]
-                    temp = ExpExl(F)
+        if fromEx:
+            # ==> store filePathName as a list
+            spl = list(filePathName.split('\\'))
+            # ==> Extract from excel
+            if len(colList) == len(mapList):
+                # ==> define one file or more
+                if spl[-1] == '*':
+                    fils = getAllExcFiles()
+                    for fi in fils:
+                        F = fi[0] + '.' + fi[1]
+                        temp = ExpExl(F)
+                        df, rc = temp[0], temp[1]
+                        temp2 = preExportXML(df, rc)
+                        for d in temp2:
+                            exportXML(d, fi[0].lower())
+                else:
+                    temp = ExpExl(spl[-1])
                     df, rc = temp[0], temp[1]
                     temp2 = preExportXML(df, rc)
                     for d in temp2:
-                        exportXML(d, fi[0].lower())
-            else:
-                temp = ExpExl(spl[-1])
-                df, rc = temp[0], temp[1]
-                temp2 = preExportXML(df, rc)
-                for d in temp2:
-                    exportXML(d, spl[-1].split('.')[0].lower())
+                        exportXML(d, spl[-1].split('.')[0].lower())
+
         elif fromOrcl and sql != '':
             ExpOrcl()
             return
-            # temp = ExpOrcl()
-            # df, rc = temp[0], temp[1]
-            # preExportXML(df, rc)
-
-            # cn = my_conn(uid='arabank', upsw='icl', saved_dns_name="oracl2k")
-            # print(cn.open_connect())
-            # # print(cn.close_connect())
-            # print(cn.runSQL("select accountid from temp_dep"))
-
-            # cursor = connection.cursor()
-            # print()
-            # cursor = connection.cursor()
-            # cursor.execute("""
-            #         SELECT first_name, last_name
-            #         FROM employees
-            #         WHERE department_id = :did AND employee_id > :eid""",
-            #         did = 50,
-            #         eid = 190)
-            # sql = 'select b.branch_no,b.bal_acc_no from arabank.bal_cr_tab b where b.cus_no=64328   and b.branch_no=919002000'
-            # cursor.execute(sql)
-            # for fname, lname in cursor:
-            #     print("Values:", fname, lname)
-            # connection.close()
-            # print(os.getcwd()+'\\')
