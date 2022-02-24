@@ -7,9 +7,10 @@ import pandas as pn
 import numpy as np
 import random as rn
 from datetime import date as dt
-import xml.etree.cElementTree as et
+import xml.etree.ElementTree as et
 from os.path import isfile, join
 from os import listdir
+# from xml.dom.minidom import parseString
 
 
 class my_conn:
@@ -47,8 +48,8 @@ class my_conn:
             return True
         except BaseException as err:
             return False, err
-        finally:
-            self.close_connect()
+        # finally:
+            # self.close_connect()
 
     def close_connect(self):
         try:
@@ -104,7 +105,7 @@ class my_conn:
                     return stdout_lines
 
                 sqlplus_script = f"""
-                        CONN / AS SYSDBA 
+                        CONN / AS SYSDBA
                         ALTER USER {self.user} IDENTIFIED BY {self.passw} ACCOUNT UNLOCK;
                         CREATE OR REPLACE DIRECTORY tst_dir AS '{savePath}';
                         GRANT READ, WRITE ON DIRECTORY tst_dir TO  {self.user};
@@ -148,15 +149,15 @@ class my_conn:
                 # startup restrict;
                 sqlplus_script = f"""
                         conn / AS SYSDBA
-                        drop user {self.user} cascade; 
-                        
+                        drop user {self.user} cascade;
+
 
                         alter session set "_ORACLE_SCRIPT"=true;
 	                    show con_name;
 
                         create user {self.user} identified by {self.passw} default tablespace CRA_DBS temporary tablespace TEMP profile DEFAULT;
-                        
-                        
+
+
                         grant create table to {self.user} ;
                         grant create trigger to {self.user} ;
                         grant create procedure to {self.user} ;
@@ -224,20 +225,21 @@ class my_conn:
         finally:
             self.close_connect()
 
-    def convertToXML(self, fromEx=False, filePathName='', sheetName=0, colList=[], maxRowsNum=0, GetAll=False):
+    def convertToXML(self, kind='', fromOrcl=False, fromEx=False, filePathName='', sheetName=0, colList=[], sql='', maxRowsNum=0):
 
-        # ==> Tags
-        unicodeTAG = r'<?xml version="1.0" encoding="utf-8"?>'
-        docTAG = [r'<document xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">', r'</document>']
-        headerTAG = [r'<header>', r'</header>', r'<bankCode>8201</bankCode>',
-                     r'<month>' + dt.today().strftime("%Y%m") + r'</month>',
-                     r'<noOfCustomers>', r'</noOfCustomers>']
-        mapList = ['nationalId', 'secondaryId', 'secondaryIdType', 'arabicName', 'englishName',
-                   'birthDate', 'birthGovCode', 'gender', 'residenceGovCode', 'nationality']
-        rowlabel = ['customers', 'customer']
+        def ExpOrcl():
+            rs = self.runSQL(sql)
+            if not rs[0]:
+                return False
+
+            filter = rs[2]
+            rc = rs[1]
+            print(type(filter))
+            print(filter)
+
+            return filter, rc
 
         # ==> getAllExcelFiles
-
         def getAllExcFiles(exten=('xls', 'xlsx')):
             fils = []
             mypath = os.curdir
@@ -247,10 +249,10 @@ class my_conn:
             return fils
 
         # ==> export data from excel file
-        def ExpExl():
+        def ExpExl(FPathName):
 
             dfSource = pn.read_excel(
-                filePathName, sheet_name=sheetName, usecols=colList, dtype=str, skiprows=range(1, 175000))  # skiprows=range(1, 175000)
+                FPathName, sheet_name=sheetName, usecols=colList, dtype=str)  # skiprows=range(1, 175000)
             # Rows Count
             rc = len(dfSource)
 
@@ -269,6 +271,7 @@ class my_conn:
 
         # ==> deviding data
         def devid_Data(df):
+            dfs = []
             circle = int((rc // maxRowsNum) + 1)
             net = int(rc % maxRowsNum)
             x = 1
@@ -278,12 +281,24 @@ class my_conn:
                     t = maxRowsNum * x
                 else:
                     t += net
-                exportXML(df[f:t])
+                # exportXML(df[f:t])
+                dfs.append(df[f:t])
                 f = t
                 x += 1
+            return dfs
+
+        # preExportXml
+        def preExportXML(df, rc):
+            # ==> set rows before export xml
+            if (rc <= maxRowsNum and maxRowsNum == 0) or maxRowsNum == 0:
+                # exportXML(df)
+                return df
+            else:
+                # devid_Data(df)
+                return devid_Data(df)
 
         # ==> Import data to XML file
-        def exportXML(Data):
+        def exportXML(Data, uniqNam):
             row = ''
             baseData = ''
             for Da in Data:  # ==> loop rows
@@ -310,6 +325,9 @@ class my_conn:
             # ==> create all file
             xmlFile = f'{unicodeTAG}' + doc
 
+            # example = parseString(xmlFile).toprettyxml()
+            # with open('file.xml', 'w') as file:
+            #     file.write(example)
             # print(xmlFile)
             # print(type(xmlFile))
             # ==> formating
@@ -318,52 +336,81 @@ class my_conn:
             pretty_xml = et.tostring(
                 x, encoding='utf8', short_empty_elements=False)
             # return
-            # ucode = xmlFile.encode("utf8")
+            # pretty_xml = xmlFile.encode("utf8")
             rrr = rn.randint(10000, 99999)
-            pyFile = open(f'{rrr}.xml', 'wb')
+            pyFile = open(f'{uniqNam}_{rrr}.xml', 'wb')
             pyFile.write(pretty_xml)
             pyFile.close()
 
         # ====================================================
         # ==> Start run coding ::
         # ====================================================
+        # ==> store filePathName as a list
+        spl = list(filePathName.split('\\'))
+        # ==> kind should be in [cust  or acc or card]
+        if kind.strip().lower() == 'cust':
+            rowlabel = ['Customers', 'Customer']
+            mapList = ['nationalId', 'secondaryId', 'secondaryIdType', 'arabicName', 'englishName',
+                       'birthDate', 'birthGovCode', 'gender', 'residenceGovCode', 'nationality']
+        elif kind.strip().lower() == 'acc':
+            rowlabel = ['Accounts', 'Account']
+            mapList = ['accountId', 'typeId', 'currencyId', 'branchId', 'isJoint',
+                       'openingDate', 'nationalId', 'secondaryId', 'secondaryIdType', 'closingDate', 'statusId', 'statusReason']
+        elif kind.strip().lower() == 'card':
+            rowlabel = ['Cards', 'Card']
+        else:
+            print(r'Should add right Kinf Attr.')
+            return
+
+        # ==> Tags
+        unicodeTAG = r'<?xml version="1.0" encoding="utf-8"?>'
+        docTAG = [r'<document xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">', r'</document>']
+        headerTAG = [r'<header>', r'</header>', r'<bankCode>8201</bankCode>',
+                     r'<month>' + dt.today().strftime("%Y%m") + r'</month>',
+                     f'<noOf{rowlabel[0]}>', f'</noOf{rowlabel[0]}>']
 
         # ==> Extract from excel
         if fromEx and len(colList) == len(mapList):
             # ==> define one file or more
-            if GetAll and filePathName == '':
+            if spl[-1] == '*':
                 fils = getAllExcFiles()
                 for fi in fils:
-                    print(fi[0] + '.' + fi[1])
+                    F = fi[0] + '.' + fi[1]
+                    temp = ExpExl(F)
+                    df, rc = temp[0], temp[1]
+                    temp2 = preExportXML(df, rc)
+                    for d in temp2:
+                        exportXML(d, fi[0].lower())
             else:
-                temp = ExpExl()
+                temp = ExpExl(spl[-1])
                 df, rc = temp[0], temp[1]
+                temp2 = preExportXML(df, rc)
+                for d in temp2:
+                    exportXML(d, spl[-1].split('.')[0].lower())
+        elif fromOrcl and sql != '':
+            ExpOrcl()
+            return
+            # temp = ExpOrcl()
+            # df, rc = temp[0], temp[1]
+            # preExportXML(df, rc)
 
-                # ==> set rows before export xml
-                if (rc <= maxRowsNum and maxRowsNum == 0) or maxRowsNum == 0:
-                    exportXML(df)
-                else:
-                    devid_Data(df)
-                    
-                    # endv
+            # cn = my_conn(uid='arabank', upsw='icl', saved_dns_name="oracl2k")
+            # print(cn.open_connect())
+            # # print(cn.close_connect())
+            # print(cn.runSQL("select accountid from temp_dep"))
 
-                    # cn = my_conn(uid='arabank', upsw='icl', saved_dns_name="oracl2k")
-                    # print(cn.open_connect())
-                    # # print(cn.close_connect())
-                    # print(cn.runSQL("select accountid from temp_dep"))
-
-                    # cursor = connection.cursor()
-                    # print()
-                    # cursor = connection.cursor()
-                    # cursor.execute("""
-                    #         SELECT first_name, last_name
-                    #         FROM employees
-                    #         WHERE department_id = :did AND employee_id > :eid""",
-                    #         did = 50,
-                    #         eid = 190)
-                    # sql = 'select b.branch_no,b.bal_acc_no from arabank.bal_cr_tab b where b.cus_no=64328   and b.branch_no=919002000'
-                    # cursor.execute(sql)
-                    # for fname, lname in cursor:
-                    #     print("Values:", fname, lname)
-                    # connection.close()
-                    # print(os.getcwd()+'\\')
+            # cursor = connection.cursor()
+            # print()
+            # cursor = connection.cursor()
+            # cursor.execute("""
+            #         SELECT first_name, last_name
+            #         FROM employees
+            #         WHERE department_id = :did AND employee_id > :eid""",
+            #         did = 50,
+            #         eid = 190)
+            # sql = 'select b.branch_no,b.bal_acc_no from arabank.bal_cr_tab b where b.cus_no=64328   and b.branch_no=919002000'
+            # cursor.execute(sql)
+            # for fname, lname in cursor:
+            #     print("Values:", fname, lname)
+            # connection.close()
+            # print(os.getcwd()+'\\')
