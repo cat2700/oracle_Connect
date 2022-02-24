@@ -6,6 +6,7 @@ import time
 import pandas as pn
 import numpy as np
 import random as rn
+import datetime
 from datetime import date as dt
 import xml.etree.ElementTree as et
 from os.path import isfile, join
@@ -228,19 +229,42 @@ class my_conn:
 
     def convertToXML(self, kind='', fromOrcl=False, fromEx=False,  filePathName='', sheetName=0, colList=[], sql='', maxRowsNum=0):
 
-        def ExpOrcl():
-            rs = self.runSQL(sql)
+        def ExpOrcl(sqlST):
+            rs = self.runSQL(sqlST)
             if not rs[0]:
-                return False
+                return False, 0
 
             rc = rs[1]
             filter = rs[2]
-            print(type(filter))
-            print(filter)
-
+            # print(type(filter))
+            # print(filter)
             return filter, rc
 
+        def aftr_orcl_exprt(da):
+            # convert tuple to list
+            for indx, item in enumerate(da):
+                da[indx] = list(da[indx])
+
+            # convert none and dates
+            nt = type(None)
+            for o in da:
+                for indx, item in enumerate(o):
+                    if type(item) is nt:
+                        o[indx] = ''
+                    elif isinstance(item, datetime.datetime):
+                        # y = datetime.datetime.strptime(
+                        #     str(item), r"%Y-%m-%d %H:%M:%S").year
+                        # m = datetime.datetime.strptime(
+                        #     str(item), r"%Y-%m-%d %H:%M:%S").month
+                        # d = datetime.datetime.strptime(
+                        #     str(item), r"%Y-%m-%d %H:%M:%S").day
+                        o[indx] = '' #str(y) + str(m).zfill(2) + str(d).zfill(2)
+
+            # print(da)
+            return da
+
         # ==> getAllExcelFiles
+
         def getAllExcFiles(exten=('xls', 'xlsx')):
             fils = []
             mypath = os.curdir
@@ -398,5 +422,9 @@ class my_conn:
                             exportXML(d, spl[-1].split('.')[0].lower())
 
         elif fromOrcl and sql != '':
-            ExpOrcl()
+            tmp = ExpOrcl(sql)
+            tmp1, tmp2 = tmp[0], tmp[1]
+            # print(tmp1)
+            # print(tmp2)
+            print(aftr_orcl_exprt(tmp1))
             return

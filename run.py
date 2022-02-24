@@ -60,38 +60,46 @@ sql = """
                      '' as englishName ,
                      CUS_BIRTHDAY as birthDate,
                      birth_gov_cod as birthGovCode,
-                     CBE_GENDER as gender,
-                     id_gov_cod as residenceGovCode,
-                     CBE_NATIONAL_ALPHA  as nationality
- from customer_tab_good_sh_1_22 sh,cbe_gender@abe_31102021,cbe_national@abe_31102021
- where sh.cus_sex = cbe_gender.abe_gendera
- and sh.cus_nationalt = cbe_national.cbe_national_code
-  and BRANCH_NO=910004000 and id_gov_cod=0
+                     --CBE_GENDER as gender,
+                     id_gov_cod as residenceGovCode --,
+                     --CBE_NATIONAL_ALPHA  as nationality
+ from customer_tab_good_sh_1_22 sh
+ --,cbe_gender@abe_31102021,cbe_national@abe_31102021
+ where 
+ --sh.cus_sex = cbe_gender.abe_gendera
+ --and sh.cus_nationalt = cbe_national.cbe_national_code
+ -- and 
+  BRANCH_NO=910004000 and id_gov_cod=0
 """
 
-rs = list(cn.runSQL(sql))
+# rs = list(cn.runSQL(sql))
 # print(rs)
 # # return
 # print(list(rs[2]))
 # print(type(rs[2]))
-da = rs[2]
+# da = rs[2]
 # print(da)
 # n = rs[2][0][1]
 # # nn = datetime.strptime(str(n), r"%Y-%m-%d %H:%M:%S").date()
 # # print(nn)
 # # print(rs[1])
-for indx, item in enumerate(da):
-    da[indx] = list(da[indx])
+# for indx, item in enumerate(da):
+#     da[indx] = list(da[indx])
 # print(da)
 
-nt = type(None)
-# dt = type(datetime.datetime)
-for o in da:
-    for indx, item in enumerate(o):
-        if type(item) is nt:
-            o[indx] = ''
-        elif isinstance(item, datetime.datetime):
-            o[indx] = datetime.datetime.strptime(str(item), r"%Y-%m-%d %H:%M:%S").date()
+# nt = type(None)
+# # dt = type(datetime.datetime)
+# for o in da:
+#     for indx, item in enumerate(o):
+#         if type(item) is nt:
+#             o[indx] = ''
+#         elif isinstance(item, datetime.datetime):
+#             y = datetime.datetime.strptime(
+#                 str(item), r"%Y-%m-%d %H:%M:%S").year
+#             m = datetime.datetime.strptime(
+#                 str(item), r"%Y-%m-%d %H:%M:%S").month
+#             d = datetime.datetime.strptime(str(item), r"%Y-%m-%d %H:%M:%S").day
+#             o[indx] = str(y) + str(m).zfill(2) + str(d).zfill(2)
 
-print(da)
-# cn.convertToXML(kind='cust', fromOrcl=True, sql=sql)
+# print(da)
+cn.convertToXML(kind='cust', fromOrcl=True, sql=sql)
