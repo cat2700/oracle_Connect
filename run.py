@@ -63,6 +63,7 @@ sql = """
                      --CBE_GENDER as gender,
                      id_gov_cod as residenceGovCode --,
                      --CBE_NATIONAL_ALPHA  as nationality
+                     ,'' ,''
  from customer_tab_good_sh_1_22 sh
  --,cbe_gender@abe_31102021,cbe_national@abe_31102021
  where 

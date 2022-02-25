@@ -6,7 +6,7 @@ import time
 import pandas as pn
 import numpy as np
 import random as rn
-import datetime
+import datetime as dati
 from datetime import date as dt
 import xml.etree.ElementTree as et
 from os.path import isfile, join
@@ -251,14 +251,15 @@ class my_conn:
                 for indx, item in enumerate(o):
                     if type(item) is nt:
                         o[indx] = ''
-                    elif isinstance(item, datetime.datetime):
-                        # y = datetime.datetime.strptime(
-                        #     str(item), r"%Y-%m-%d %H:%M:%S").year
-                        # m = datetime.datetime.strptime(
-                        #     str(item), r"%Y-%m-%d %H:%M:%S").month
-                        # d = datetime.datetime.strptime(
-                        #     str(item), r"%Y-%m-%d %H:%M:%S").day
-                        o[indx] = '' #str(y) + str(m).zfill(2) + str(d).zfill(2)
+                    elif isinstance(item, dati.datetime):
+                        y = dati.datetime.strptime(
+                            str(item), r"%Y-%m-%d %H:%M:%S").year
+                        m = dati.datetime.strptime(
+                            str(item), r"%Y-%m-%d %H:%M:%S").month
+                        d = dati.datetime.strptime(
+                            str(item), r"%Y-%m-%d %H:%M:%S").day
+
+                        o[indx] = str(y) + str(m).zfill(2) + str(d).zfill(2)
 
             # print(da)
             return da
@@ -330,7 +331,7 @@ class my_conn:
                 x = 0
                 row = ''
                 for c in mapList:  # ==> loop columns
-                    row += f'<{c}>' + Da[x] + f'</{c}>'
+                    row += f'<{c}>' + str(Da[x]) + f'</{c}>'
                     x += 1
 
                 row = f'<{rowlabel[1]}>' + row + f'</{rowlabel[1]}>'
@@ -424,7 +425,17 @@ class my_conn:
         elif fromOrcl and sql != '':
             tmp = ExpOrcl(sql)
             tmp1, tmp2 = tmp[0], tmp[1]
+            # chick for columns count
+            if len(tmp1[0]) != len(mapList):
+                print(
+                    f'Sorry return {len(tmp1[0])} columns dont equal {len(mapList)} map columns')
+                return
             # print(tmp1)
             # print(tmp2)
-            print(aftr_orcl_exprt(tmp1))
-            return
+            df = aftr_orcl_exprt(tmp1)
+            temp2 = preExportXML(df, tmp2)
+            if maxRowsNum == 0:
+                exportXML(temp2, '')
+            else:
+                for d in temp2:
+                    exportXML(d, '')
