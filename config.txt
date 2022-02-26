@@ -1,0 +1,4 @@
+run||true
+WA-path||C:\Users\admin\Desktop\oracle_Connect\walletA
+WA-sql||insert into TEMP values (:1, :2)
+WA_columnsHeader||['code', 'name']

@@ -15,7 +15,7 @@ from os import listdir
 from datetime import datetime
 
 
-class my_conn:
+class mainClass:
 
     connection = None
     rows = []
@@ -60,7 +60,7 @@ class my_conn:
         except BaseException as err:
             return False, err
 
-    def runSQL(self, SQLst, values=[]):
+    def runSQL(self, SQLst):
         try:
             if SQLst == '':
                 return False
@@ -72,14 +72,28 @@ class my_conn:
                     self.rows = cursor.fetchall()
                     self.rowsLen = len(self.rows)
                 elif SQLst.lstrip().lower()[:2] in ('in', 'de'):
-                    if len(values) > 0:
-                        cursor.executemany(SQLst, values)
-                    else:
-                        cursor.execute(SQLst)
+                    cursor.execute(SQLst)
                     self.connection.commit()
                 return True, self.rowsLen, self.rows
-        except BaseException as err:
-            return False, err
+        except Exception as err:
+            return False, err, err.args
+        finally:
+            self.close_connect()
+
+    def insertMany(self, SQLst, values=[]):
+        try:
+            if SQLst == '':
+                return False
+            else:
+                self.open_connect()
+                cursor = self.connection.cursor()
+                if SQLst.lstrip().lower()[:2] in ('in') and len(values) > 0:
+                    cursor.executemany(SQLst, values)
+                    self.connection.commit()
+                    return True
+
+        except Exception as err:
+            return False, err, err.args
         finally:
             self.close_connect()
 
@@ -439,3 +453,77 @@ class my_conn:
             else:
                 for d in temp2:
                     exportXML(d, '')
+
+    def ReadWalletFiles(self, FolderPath, columnsHeader=[], sqlST=''):
+
+        def readConfig(*tags):
+            try:
+                cd = os.curdir + r"\config.txt"
+                rf = open(cd, 'r')
+                all = rf.read().splitlines()
+                if len(tags) == 0:
+                    return all
+                else:
+                    res = []
+                    for indx, item in enumerate(all):
+                        if all[indx].split('||')[0] in tags:
+                            res.append(all[indx].split('||')[1])
+                    print(res)
+            except Exception as err:
+                return False
+            finally:
+                rf.close()
+
+        # ==> getAllExcelFiles
+        def getAllExcFiles(FolPath, exten=('xls', 'xlsx')):
+            try:
+                fils = []
+                if not str(FolPath).endswith("\\"):
+                    fb = str(FolPath) + "\\"
+                else:
+                    fb = str(FolPath)  # os.curdir
+                for f in listdir(fb):
+                    if isfile(join(fb, f)) and f.endswith(exten):
+                        fils.append(fb + f)
+                return fils
+            except Exception as err:
+                print(err)
+                return fils
+
+        def readExcel(fil, colmnList, sheetNam=0):
+            dfSource = pn.read_excel(
+                fil, usecols=colmnList, sheet_name=sheetNam)  # skiprows=range(1, 175000)
+            # Rows Count
+            rc = len(dfSource)
+
+            # printq(dfSource)
+            # print(type(dfSource))
+            # print(len(dfSource))
+            # print(dfSource.fillna(value=''))
+
+            # .astype(str) # .fillna(value='')
+            filter = dfSource.loc[:, colmnList].to_numpy()
+
+            # print(filter)
+            # print(type(filter))
+
+            return filter
+
+        """
+            Starting Code
+        """
+
+        readConfig('run', 'WA_columnsHeader')
+
+        return
+        if len(columnsHeader) == 0:
+            print(
+                f'should enter columns Header {len(columnsHeader)} ')
+            return False
+        # => get all files in folder path
+        fs = getAllExcFiles(FolPath=FolderPath)
+        if len(fs) == 0:
+            return False
+        for f in fs:
+            L = list(readExcel(fil=f, colmnList=columnsHeader))
+            print(self.insertMany(sqlST, L))
