@@ -454,9 +454,15 @@ class mainClass:
                 for d in temp2:
                     exportXML(d, '')
 
-    def ReadWalletFiles(self, FolderPath, columnsHeader=[], sqlST=''):
+    def ReadWalletFiles(self, readKind=''):
+        # Folders Details
+        def kind(k):
+            return {
+                'a': ['WA-path', 'WA-sql', 'WA_columnsHeader'],
+                'b': ['WB-path', 'WB-sql', 'WB_columnsHeader'],
+            }.get(k, None)
 
-        def readConfig(*tags):
+        def readConfig(tags=[]):
             try:
                 cd = os.curdir + r"\config.txt"
                 rf = open(cd, 'r')
@@ -466,9 +472,9 @@ class mainClass:
                 else:
                     res = []
                     for indx, item in enumerate(all):
-                        if all[indx].split('||')[0] in tags:
-                            res.append(all[indx].split('||')[1])
-                    print(res)
+                        if all[indx].split('||')[0].strip() in tags:
+                            res.append(all[indx].split('||')[1].strip())
+                    return res
             except Exception as err:
                 return False
             finally:
@@ -512,10 +518,15 @@ class mainClass:
         """
             Starting Code
         """
+        if kind(readKind.lower()) == None:
+            print('invalid kind')
+            return
+        # get folders Details
+        FData = readConfig(kind(readKind.lower()))
+        FolderPath = FData[0].strip()
+        sqlST = FData[1].strip()
+        columnsHeader = list(FData[2].strip().replace(' ', '').split(','))
 
-        readConfig('run', 'WA_columnsHeader')
-
-        return
         if len(columnsHeader) == 0:
             print(
                 f'should enter columns Header {len(columnsHeader)} ')
