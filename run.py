@@ -136,5 +136,4 @@ cn = catClass.mainClass(uid='arabank', upsw='icl', service_name="oracl2k")
 # # print('t is :' + str(t.is_alive()))
 
 
-cn.ReadWalletFiles('a')  # FolderPath=r"C:\Users\admin\Desktop\oracle_Connect\walletA",
-# sqlST=r'insert into TEMP values (:1, :2)'
+# cn.ReadWalletFiles('a')
