@@ -261,7 +261,7 @@ class mainClass:
 
         def aftr_orcl_exprt(da):
             print('staring aftr_orcl_exprt')
-
+            convAnd = 0  # to store count of cells who convert the & in it
             # convert tuple to list
             for indx, item in enumerate(da):
                 da[indx] = list(da[indx])
@@ -284,8 +284,10 @@ class mainClass:
                     elif isinstance(item, str):
                         A = item.replace(r"&", r"-")
                         o[indx] = A
+                        convAnd += 1
 
-            # print(da)
+            if convAnd > 0:
+                print(f'Converted cells whith 7 is : {convAnd}')
             return da
 
         # ==> getAllExcelFiles
