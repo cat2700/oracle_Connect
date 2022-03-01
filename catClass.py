@@ -9,6 +9,9 @@ import random as rn
 import datetime as dati
 from datetime import date as dt
 import xml.etree.ElementTree as et
+import xml.dom.minidom as xxx
+
+# from lxml import etree
 from os.path import isfile, join
 from os import listdir
 # from xml.dom.minidom import parseString
@@ -244,6 +247,8 @@ class mainClass:
     def convertToXML(self, kind='', fromOrcl=False, fromEx=False,  filePathName='', sheetName=0, colList=[], sql='', maxRowsNum=0):
 
         def ExpOrcl(sqlST):
+            print('staring ExpOrcl')
+
             rs = self.runSQL(sqlST)
             if not rs[0]:
                 return False, 0
@@ -255,6 +260,8 @@ class mainClass:
             return filter, rc
 
         def aftr_orcl_exprt(da):
+            print('staring aftr_orcl_exprt')
+
             # convert tuple to list
             for indx, item in enumerate(da):
                 da[indx] = list(da[indx])
@@ -274,6 +281,9 @@ class mainClass:
                             str(item), r"%Y-%m-%d %H:%M:%S").day
 
                         o[indx] = str(y) + str(m).zfill(2) + str(d).zfill(2)
+                    elif isinstance(item, str):
+                        A = item.replace(r"&", r"-")
+                        o[indx] = A
 
             # print(da)
             return da
@@ -281,6 +291,7 @@ class mainClass:
         # ==> getAllExcelFiles
 
         def getAllExcFiles(exten=('xls', 'xlsx')):
+            print('staring getAllExcFiles')
             fils = []
             mypath = os.curdir
             for f in listdir(mypath):
@@ -290,7 +301,7 @@ class mainClass:
 
         # ==> export data from excel file
         def ExpExl(FPathName):
-
+            print('staring ExpExl')
             dfSource = pn.read_excel(
                 FPathName, sheet_name=sheetName, usecols=colList, dtype=str)  # skiprows=range(1, 175000)
             # Rows Count
@@ -311,6 +322,7 @@ class mainClass:
 
         # ==> deviding data
         def devid_Data(df):
+            print('staring devid_Data')
             dfs = []
             circle = int((rc // maxRowsNum) + 1)
             net = int(rc % maxRowsNum)
@@ -328,7 +340,9 @@ class mainClass:
             return dfs
 
         # preExportXml
+
         def preExportXML(df, rc):
+            print('staring preExportXML')
             # ==> set rows before export xml
             if (rc <= maxRowsNum and maxRowsNum == 0) or maxRowsNum == 0:
                 # exportXML(df)
@@ -339,8 +353,10 @@ class mainClass:
 
         # ==> Import data to XML file
         def exportXML(Data, uniqNam):
+            print('staring exportXML')
             row = ''
             baseData = ''
+
             for Da in Data:  # ==> loop rows
                 x = 0
                 row = ''
@@ -365,18 +381,31 @@ class mainClass:
             # ==> create all file
             xmlFile = f'{unicodeTAG}' + doc
 
+            # xml = xxx.parseString(xmlFile)
+            # xml_pretty_str = xml.toprettyxml()
+
             # example = parseString(xmlFile).toprettyxml()
             # with open('file.xml', 'w') as file:
             #     file.write(example)
             # print(xmlFile)
             # print(type(xmlFile))
+
             # ==> formating
+
             x = et.XML(xmlFile)
+
+            # parser = et.XMLParser(encoding="utf-8")
+            #parser = etree.XMLParser(recover=True)
+
+            # x = et.fromstring(xmlFile, parser=parser)
+            # x = etree.fromstring(xmlFile, parser=parser)
+
             et.indent(x)
+
             pretty_xml = et.tostring(
                 x, encoding='utf8', short_empty_elements=False)
-            # return
             # pretty_xml = xmlFile.encode("utf8")
+
             rrr = rn.randint(10000, 99999)
             pyFile = open(f'{uniqNam}_{rrr}.xml', 'wb')
             pyFile.write(pretty_xml)

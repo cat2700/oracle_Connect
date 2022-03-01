@@ -74,6 +74,27 @@ cn = catClass.mainClass(uid='arabank', upsw='icl', service_name="oracl2k")
 #   BRANCH_NO=910004000 and id_gov_cod=0
 # """
 
+sql = """ 
+    select           CUS_CIVIL_NO as nationalId,
+                     '' as secondaryId ,
+                     '' as secondaryIdType ,
+                     CUS_NAM_L as arabicName,
+                     '' as englishName ,
+                     CUS_BIRTHDAY as birthDate,
+                     birth_gov_cod as birthGovCode,
+                     id_gov_cod as residenceGovCode,
+                     '' ,''
+ from customer_tab_good_sh_1_22 sh
+   where  substr(branch_no,1,3) in 901
+   --and rownum <100000
+   --and birth_gov_cod between 14 and 14
+   --and id_gov_cod between 14 and 14
+   --and (extract(year from CUS_BIRTHDAY)  in (1948) )
+   
+"""
+# 24803020102167
+
+
 # rs = list(cn.runSQL(sql))
 # print(rs)
 # # return
@@ -104,7 +125,7 @@ cn = catClass.mainClass(uid='arabank', upsw='icl', service_name="oracl2k")
 #             o[indx] = str(y) + str(m).zfill(2) + str(d).zfill(2)
 
 # print(da)
-# cn.convertToXML(kind='cust', fromOrcl=True, sql=sql)
+cn.convertToXML(kind='cust', fromOrcl=True, sql=sql)
 
 # ----------------
 # def tst():
