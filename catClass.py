@@ -10,7 +10,6 @@ import datetime as dati
 from datetime import date as dt
 import xml.etree.ElementTree as et
 import xml.dom.minidom as xxx
-
 # from lxml import etree
 from os.path import isfile, join
 from os import listdir
@@ -24,7 +23,7 @@ class mainClass:
     rows = []
     rowsLen = 0
 
-    def __init__(self, uid, upsw, service_name='', ip='127.0.0.1', port='1521', saved_dns_name=''):
+    def __init__(self, uid='', upsw='', service_name='', ip='127.0.0.1', port='1521', saved_dns_name=''):
         self.user = uid
         self.passw = upsw
         self.service = service_name
@@ -281,13 +280,13 @@ class mainClass:
                             str(item), r"%Y-%m-%d %H:%M:%S").day
 
                         o[indx] = str(y) + str(m).zfill(2) + str(d).zfill(2)
-                    elif isinstance(item, str):
+                    elif isinstance(item, str) and str(item).find('&') != -1:
                         A = item.replace(r"&", r"-")
                         o[indx] = A
                         convAnd += 1
 
             if convAnd > 0:
-                print(f'Converted cells whith 7 is : {convAnd}')
+                print(f'Converted cells whith & is : {convAnd}')
             return da
 
         # ==> getAllExcelFiles
@@ -569,3 +568,21 @@ class mainClass:
         for f in fs:
             L = list(readExcel(fil=f, colmnList=columnsHeader))
             print(self.insertMany(sqlST, L))
+
+    def readConfig(self, configFileName, tags=[]):
+        try:
+            cd = os.curdir + f"\\{configFileName}.txt"
+            rf = open(cd, 'r')
+            all = rf.read().splitlines()
+            if len(tags) == 0:
+                return all
+            else:
+                res = []
+                for indx, item in enumerate(all):
+                    if all[indx].split('||')[0].strip() in tags:
+                        res.append(all[indx].split('||')[1].strip())
+                return res
+        except Exception as err:
+            return False
+        finally:
+            rf.close()

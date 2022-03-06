@@ -3,10 +3,19 @@ import catClass
 # from datetime import datetime
 # import datetime
 import threading
+import time
 
 
-cn = catClass.mainClass(uid='arabank', upsw='icl', service_name="oracl2k")
+cn = catClass.mainClass()
+
+conf = cn.readConfig(configFileName="oracleConfig",
+                     tags=['usrid', 'pass', 'sevice'])
+
+cn = catClass.mainClass(
+    uid=f'{conf[0]}', upsw=f'{conf[1]}', service_name=f'{conf[2]}')
 # print(cn.open_connect())
+
+
 # print(cn.close_connect())
 # sql = """
 #     select           CUS_CIVIL_NO as nationalId,
@@ -74,24 +83,24 @@ cn = catClass.mainClass(uid='arabank', upsw='icl', service_name="oracl2k")
 #   BRANCH_NO=910004000 and id_gov_cod=0
 # """
 
-sql = """ 
-    select           CUS_CIVIL_NO as nationalId,
-                     '' as secondaryId ,
-                     '' as secondaryIdType ,
-                     CUS_NAM_L as arabicName,
-                     '' as englishName ,
-                     CUS_BIRTHDAY as birthDate,
-                     birth_gov_cod as birthGovCode,
-                     id_gov_cod as residenceGovCode,
-                     '' ,''
- from customer_tab_good_sh_1_22 sh
-   where  substr(branch_no,1,3) in 901
-   --and rownum <100000
-   --and birth_gov_cod between 14 and 14
-   --and id_gov_cod between 14 and 14
-   --and (extract(year from CUS_BIRTHDAY)  in (1948) )
-   
-"""
+# sql = """
+#     select           CUS_CIVIL_NO as nationalId,
+#                      '' as secondaryId ,
+#                      '' as secondaryIdType ,
+#                      CUS_NAM_L as arabicName,
+#                      '' as englishName ,
+#                      CUS_BIRTHDAY as birthDate,
+#                      birth_gov_cod as birthGovCode,
+#                      id_gov_cod as residenceGovCode,
+#                      '' ,''
+#  from customer_tab_good_sh_1_22 sh
+#    where  substr(branch_no,1,3) in 901
+#    --and rownum <100000
+#    --and birth_gov_cod between 14 and 14
+#    --and id_gov_cod between 14 and 14
+#    --and (extract(year from CUS_BIRTHDAY)  in (1948) )
+
+# """
 # 24803020102167
 
 
@@ -125,7 +134,7 @@ sql = """
 #             o[indx] = str(y) + str(m).zfill(2) + str(d).zfill(2)
 
 # print(da)
-cn.convertToXML(kind='cust', fromOrcl=True, sql=sql)
+# cn.convertToXML(kind='cust', fromOrcl=True, sql=sql)
 
 # ----------------
 # def tst():
@@ -158,3 +167,25 @@ cn.convertToXML(kind='cust', fromOrcl=True, sql=sql)
 
 
 # cn.ReadWalletFiles('a')
+
+
+# ================
+
+
+conf = cn.readConfig(configFileName="shmolConfig",
+                     tags=['kind', 'fromOrcl', 'fromEx', 'filePathName', 'sheetName', 'colList', 'sql', 'maxRowsNum'])
+if len(conf) == 8:
+    def run():
+        cn.convertToXML(kind=f'{conf[0]}', fromOrcl=bool(
+            int(conf[1])), fromEx=bool(int(conf[2])), filePathName=f'{conf[3]}', sheetName=int(conf[4]),
+            colList=list(conf[5]), sql=f'{conf[6]}', maxRowsNum=int(conf[7]))
+    t = threading.Timer(0.01, run)
+    t.start()
+    start_time = time.time()
+    print('started')
+    t._wait_for_tstate_lock()
+    print('finished')
+    print(f"---{time.time() - start_time} seconds ---")
+
+else:
+    print("should be get 8 args, chick shmolConfig File args")
