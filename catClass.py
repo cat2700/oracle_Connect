@@ -9,6 +9,7 @@ import random as rn
 import datetime as dati
 from datetime import date as dt
 import xml.etree.ElementTree as et
+# from xml.etree import ElementTree
 import xml.dom.minidom as xxx
 # from lxml import etree
 from os.path import isfile, join
@@ -355,21 +356,23 @@ class mainClass:
         # ==> Import data to XML file
         def exportXML(Data, uniqNam):
             print('staring exportXML')
-            row = ''
-            baseData = ''
 
-            for Da in Data:  # ==> loop rows
-                x = 0
-                row = ''
-                for c in mapList:  # ==> loop columns
-                    row += f'<{c}>' + str(Da[x]) + f'</{c}>'
-                    x += 1
+            # row = ''
+            # baseData = ''
 
-                row = f'<{rowlabel[1]}>' + row + f'</{rowlabel[1]}>'
-                baseData += row
+            # for Da in Data:  # ==> loop rows
+            #     x = 0
+            #     row = ''
+            #     for c in mapList:  # ==> loop columns
+            #         row += f'<{c}>' + str(Da[x]) + f'</{c}>'
+            #         x += 1
 
-            parent = f'<{rowlabel[0]}>' + baseData + f'</{rowlabel[0]}>'
+            #     row = f'<{rowlabel[1]}>' + row + f'</{rowlabel[1]}>'
+            #     baseData += row
 
+            # parent = f'<{rowlabel[0]}>' + baseData + f'</{rowlabel[0]}>'
+            parent = netXML(Data)
+            # print(parent)
             # ==> create header
             count = f'{headerTAG[4]}' + str(len(Data)) + f'{headerTAG[5]}'
             head = f'{headerTAG[0]}' + f'{headerTAG[2]}' + \
@@ -412,6 +415,33 @@ class mainClass:
             pyFile.write(pretty_xml)
             pyFile.close()
 
+        def netXML(Data):
+            print('staring netXML')
+
+            A = et.Element(rowlabel[0])
+            for rows in Data:
+                B = et.SubElement(A, rowlabel[1])
+                # store count of fieldes
+                f, t = 0, len(Data[0])
+                while f < t:
+                    et.SubElement(B, mapList[f]).text = str(rows[f])
+                    f += 1
+
+            tree = et.ElementTree(A)
+            tree.write('temp.xml', encoding='utf-8',
+                       xml_declaration=True, short_empty_elements=False)
+            cd = os.curdir + r"\temp.xml"
+            rf = open(cd, 'r', encoding="utf-8")
+            allData = rf.read()
+            rf.close()
+            if os.path.exists("temp.xml"):
+                os.remove("temp.xml")
+            rem = r"<?xml version='1.0' encoding='utf-8'?>"
+            netDataXML = allData.replace(rem, "")
+            # f = open("demofile2.txt", "a")
+            # f.write(netData)
+            # f.close()
+            return netDataXML
         # ====================================================
         # ==> Start run coding ::
         # ====================================================
