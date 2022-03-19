@@ -172,20 +172,26 @@ cn = catClass.mainClass(
 # ================
 
 
-conf = cn.readConfig(configFileName="shmolConfig",
-                     tags=['kind', 'fromOrcl', 'fromEx', 'filePathName', 'sheetName', 'colList', 'sql', 'maxRowsNum'])
-if len(conf) == 8:
-    def run():
-        cn.convertToXML(kind=f'{conf[0]}', fromOrcl=bool(
-            int(conf[1])), fromEx=bool(int(conf[2])), filePathName=f'{conf[3]}', sheetName=int(conf[4]),
-            colList=list(conf[5]), sql=f'{conf[6]}', maxRowsNum=int(conf[7]))
-    t = threading.Timer(0.01, run)
-    t.start()
-    start_time = time.time()
-    print('started')
-    t._wait_for_tstate_lock()
-    print('finished')
-    print(f"---{time.time() - start_time} seconds ---")
+# conf = cn.readConfig(configFileName="shmolConfig",
+#                      tags=['kind', 'fromOrcl', 'fromEx', 'filePathName', 'sheetName', 'colList', 'sql', 'maxRowsNum'])
+# if len(conf) == 8:
+#     def run():
+#         cn.convertToXML(kind=f'{conf[0]}', fromOrcl=bool(
+#             int(conf[1])), fromEx=bool(int(conf[2])), filePathName=f'{conf[3]}', sheetName=int(conf[4]),
+#             colList=list(conf[5]), sql=f'{conf[6]}', maxRowsNum=int(conf[7]))
+#     t = threading.Timer(0.01, run)
+#     t.start()
+#     start_time = time.time()
+#     print('started')
+#     t._wait_for_tstate_lock()
+#     print('finished')
+#     print(f"---{time.time() - start_time} seconds ---")
 
-else:
-    print("should be get 8 args, chick shmolConfig File args")
+# else:
+#     print("should be get 8 args, chick shmolConfig File args")
+
+
+# =======================================
+start_time = time.time()
+cn.procShmool()
+print(f"---{time.time() - start_time} seconds ---")
