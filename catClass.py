@@ -78,12 +78,12 @@ class mainClass:
                     cursor.execute(SQLst)
                     self.connection.commit()
                 elif SQLst.lstrip().lower()[:2] in ('dr', 'cr', 'be'):
-                    print('====')
                     cursor.execute(SQLst)
                     self.connection.commit()
                 return True, self.rowsLen, self.rows
         except Exception as err:
             return False, str(err), err.args
+            print(False, str(err), err.args)
         finally:
             self.close_connect()
 
@@ -621,144 +621,175 @@ class mainClass:
         finally:
             rf.close()
 
-    def procShmool(self):
+    def procShmool(self, fetchAll=True):
+        try:
+            # fixing datatype
+            def fix(row):
+                # convert none and dates
+                nt = type(None)
+                for indx, item in enumerate(row):
+                    if type(item) is nt:
+                        row[indx] = ''
+                    elif isinstance(item, dati.datetime):
+                        y = dati.datetime.strptime(
+                            str(item), r"%Y-%m-%d %H:%M:%S").year
+                        m = dati.datetime.strptime(
+                            str(item), r"%Y-%m-%d %H:%M:%S").month
+                        d = dati.datetime.strptime(
+                            str(item), r"%Y-%m-%d %H:%M:%S").day
 
-        def cursor(sqlST):
-            try:
-                print('starting cursor')
-                good, err = [], []
-                self.open_connect()
-                cursor = self.connection.cursor()
+                        row[indx] = str(
+                            y) + str(m).zfill(2) + str(d).zfill(2)
+                    elif isinstance(item, str) and str(item).find('&') != -1:
+                        A = item.replace(r"&", r"-")
+                        row[indx] = A
+                return row
+            # process the procedure
 
-                # cursor.prefetchrows = 10
-                # cursor.arraysize = 10
+            def process(row):
+                # chk for 14 digit
+                if len(row[3]) != 14:
+                    err.append(('1', 'not equal 14 digit',
+                                row[0], row[1], row[2]))
+                    return
+                else:
+                    good.append((row[0], row[1], row[2]))
+            # drop and create good and errors tabels
 
-                cursor.execute(sqlST)
-                # fixing datatype
+            def dropAndCreateTBL():
+                sql = """begin
+                                execute immediate 'DROP TABLE customer_tab_error';
+                                exception when others then
+                                if sqlcode <> -942 then
+                                    raise;
+                                end if;
+                            end; """
+                self.runSQL(sql)
+                sql = """create table customer_tab_error
+                        (
+                            errcode   CHAR(4),
+                            errdesc   CHAR(200),
+                            myrowid   ROWID,
+                            branch_no NUMBER(10) not null,
+                            cus_no    NUMBER(10) not null
+                        )
+                        """
+                self.runSQL(sql)
+                sql = """begin
+                                execute immediate 'DROP TABLE customer_tab_good';
+                                exception when others then
+                                if sqlcode <> -942 then
+                                    raise;
+                                end if;
+                            end; """
+                self.runSQL(sql)
+                sql = """create table customer_tab_good
+                        (
+                            myrowid   ROWID,
+                            branch_no NUMBER(10) not null,
+                            cus_no    NUMBER(10) not null
+                        )
+                        """
+                self.runSQL(sql)
 
-                def fix(row):
-                    # convert none and dates
-                    nt = type(None)
-                    for indx, item in enumerate(row):
-                        if type(item) is nt:
-                            row[indx] = ''
-                        elif isinstance(item, dati.datetime):
-                            y = dati.datetime.strptime(
-                                str(item), r"%Y-%m-%d %H:%M:%S").year
-                            m = dati.datetime.strptime(
-                                str(item), r"%Y-%m-%d %H:%M:%S").month
-                            d = dati.datetime.strptime(
-                                str(item), r"%Y-%m-%d %H:%M:%S").day
+            def writelog(fileName, line):
+                try:
+                    cd = os.curdir + f"\\{fileName}"
+                    rf = open(cd, 'w')
+                    rf.write(str(line))
+                except Exception as err:
+                    print(str(err))
+                finally:
+                    rf.close()
 
-                            row[indx] = str(
-                                y) + str(m).zfill(2) + str(d).zfill(2)
-                        elif isinstance(item, str) and str(item).find('&') != -1:
-                            A = item.replace(r"&", r"-")
-                            row[indx] = A
-                    return row
-                # process the procedure
+            cus_sql = """
+                select c.rowid ,c.branch_no , c.cus_no ,c.cus_civil_no
+                    , c.cus_nam_l,c.cus_addr_l,c.addr_pos_l,c.cus_typ,c.cus_sex
+                    ,c.cus_id_dat,c.cus_activity,c.cus_birthday ,to_char(c.cus_tel_no) cus_tel_no
+                    ,to_char(c.mobil_no) mobil_no,c.id_gov_cod,c.birth_gov_cod bgc
+                from customer_tab c
+                where
+                c.cus_kind = 0 and cus_opn_dat <= to_date('28/02/2022')
+                and branch_no not in( 905001080,919009000)
+                and   (branch_no,cus_no) in
+                (
 
-                def process(row):
-                    # chk for 14 digit
-                    if len(row[3]) != 14:
-                        err.append(('1', 'not equal 14 digit',
-                                   row[0], row[1], row[2]))
-                        return
-                    else:
-                        good.append((row[0], row[1], row[2]))
+                    select branch_no , cus_no from bal_cr_tab b
+                    where --bal_blnc >0 and
+                    bal_close_dt is null
 
-                # while True:
-                #     row = cursor.fetchone()
-                #     if row is None:
-                #         break
-                #     process(fix(list(row)))
-                #     print(
-                #         f"good rows is : {len(good)} and errors rows is : {len(err)}")
+                    union
+
+                    select  branch_no , cus_no from crt_bal c
+                    where certif_flg in (1,2) and to_dat > '28/02/2022'
+
+                    union
+
+                    select  branch_no , cus_no from deposit_tab d
+                    where dp_upd_dsg not in (2,4,6) and dp_dlt_dt is null and dp_val_dt > '28/02/2022'
+
+                    union
+
+                    select  branch_no , cus_no from LON_MASTER LS
+                    where  LOAN_STATUS not in (2,6,9)
+
+                    union
+                    select branch_no , cus_no from bal_DB_tab DB
+                    where  --bal_blnc >0 and
+                    bal_close_dt is null
+
+                )
+                --and c.cus_civil_no not in (select cus_civil_no from CUSTOMER_TAB_shmol_rej)
+                and c.cus_nationalt = 1
+                and substr(c.cus_civil_no,8,2) in (select lpad(g.gov_id,2,0) from gov_tab g)
+                and c.id_gov_cod in (select lpad(g.gov_id,2,0) from gov_tab g)
+                and substr(c.cus_civil_no,8,2) = to_char(c.birth_gov_cod)
+                and substr(c.cus_civil_no,2,6) = to_char(c.cus_birthday,'YYMMDD')
+                --and substr(c.branch_no,1,3) in (910)
+            """
+            print('define cursor')
+            good, err = [], []
+            self.open_connect()
+            cursor = self.connection.cursor()
+            # cursor.prefetchrows = 86789
+            # cursor.arraysize = 86788
+            cursor.execute(cus_sql)
+
+            print('start fetch')
+            # start fetch rows
+            if fetchAll:
                 rows = cursor.fetchall()
                 print("starting loop in rows")
                 for row in rows:
                     process(fix(list(row)))
-                    print(
-                        f"good rows is : {len(good)} and errors rows is : {len(err)}")
-                print(err)
-                # posting errors data
-                sql = """begin
-                            execute immediate 'DROP TABLE customer_tab_error';
-                            exception when others then
-                            if sqlcode <> -942 then
-                                raise;
-                            end if;
-                        end; """
-                print(self.runSQL(sql))
-                sql = """create table customer_tab_error
-                     (
-                        errcode   CHAR(4),
-                        errdesc   CHAR(200),
-                        myrowid   ROWID,
-                        branch_no NUMBER(10) not null,
-                        cus_no    NUMBER(10) not null
-                    )
+                    # print(
+                    #     f"good rows is : {len(good)} and errors rows is : {len(err)}")
+            else:
+                print("starting loop in rows")
+                while True:
+                    row = cursor.fetchone()
+                    if row is None:
+                        break
+                    process(fix(list(row)))
+                    # print(
+                    #     f"good rows is : {len(good)} and errors rows is : {len(err)}")
+            writelog("err.txt", err)
+            writelog("good.txt", good)
+
+            dropAndCreateTBL()
+            # posting errors data
+            ersql = """insert into customer_tab_error
+                    values (:1,:2,:3,:4,:5) 
                     """
-                print(self.runSQL(sql))
-                ersql = """insert into customer_tab_error
-                        values (:1,:2,:3,:4,:5) 
-                        """
-                print(self.insertMany(ersql, err))
+            print(self.insertMany(ersql, err))
+            godsql = """insert into customer_tab_good
+                    values (:1,:2,:3) 
+                    """
+            print(self.insertMany(godsql, good))
 
-            except Exception as err:
-                print(f'error in cursor: {err}')
-                return False
-            finally:
-                self.close_connect()
-
-        cus_sql = """
-
-
-            select c.rowid ,c.branch_no , c.cus_no ,c.cus_civil_no
-                , c.cus_nam_l,c.cus_addr_l,c.addr_pos_l,c.cus_typ,c.cus_sex
-                ,c.cus_id_dat,c.cus_activity,c.cus_birthday ,to_char(c.cus_tel_no) cus_tel_no
-                ,to_char(c.mobil_no) mobil_no,c.id_gov_cod,c.birth_gov_cod bgc
-            from customer_tab c
-            where
-            c.cus_kind = 0 and cus_opn_dat <= to_date('28/02/2022')
-            and branch_no not in( 905001080,919009000)
-            and   (branch_no,cus_no) in
-            (
-
-                select branch_no , cus_no from bal_cr_tab b
-                where --bal_blnc >0 and
-                bal_close_dt is null
-
-                union
-
-                select  branch_no , cus_no from crt_bal c
-                where certif_flg in (1,2) and to_dat > '28/02/2022'
-
-                union
-
-                select  branch_no , cus_no from deposit_tab d
-                where dp_upd_dsg not in (2,4,6) and dp_dlt_dt is null and dp_val_dt > '28/02/2022'
-
-                union
-
-                select  branch_no , cus_no from LON_MASTER LS
-                where  LOAN_STATUS not in (2,6,9)
-
-                union
-                select branch_no , cus_no from bal_DB_tab DB
-                where  --bal_blnc >0 and
-                bal_close_dt is null
-
-            )
-            --and c.cus_civil_no not in (select cus_civil_no from CUSTOMER_TAB_shmol_rej)
-            and c.cus_nationalt = 1
-            and substr(c.cus_civil_no,8,2) in (select lpad(g.gov_id,2,0) from gov_tab g)
-            and c.id_gov_cod in (select lpad(g.gov_id,2,0) from gov_tab g)
-            and substr(c.cus_civil_no,8,2) = to_char(c.birth_gov_cod)
-            and substr(c.cus_civil_no,2,6) = to_char(c.cus_birthday,'YYMMDD')
-            and substr(c.branch_no,1,3) in (910)
-
-        """
-        cursor(cus_sql)
-
-        return
+            return
+        except Exception as err:
+            print(f'error in cursor: {err}')
+            return False
+        finally:
+            self.close_connect()

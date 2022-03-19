@@ -193,5 +193,5 @@ cn = catClass.mainClass(
 
 # =======================================
 start_time = time.time()
-cn.procShmool()
+cn.procShmool(fetchAll=True)
 print(f"---{time.time() - start_time} seconds ---")
