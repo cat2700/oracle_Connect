@@ -652,8 +652,13 @@ class mainClass:
                     err.append(('1', 'not equal 14 digit',
                                 row[0], row[1], row[2]))
                     return
+                # elif row[3] == None or row[3] == '' or row[3] == '0':
+                #     err.append(('2', 'لا يوجد رقم قومى',
+                #                 row[0], row[1], row[2]))
+                #     return
                 else:
                     good.append((row[0], row[1], row[2]))
+
             # drop and create good and errors tabels
 
             def dropAndCreateTBL():
@@ -703,9 +708,9 @@ class mainClass:
                     rf.close()
 
             cus_sql = """
-                select c.rowid ,c.branch_no , c.cus_no ,c.cus_civil_no
+                select c.rowid ,c.branch_no , c.cus_no ,c.cus_civil_no ,TRUNC(c.cus_birthday)
                     , c.cus_nam_l,c.cus_addr_l,c.addr_pos_l,c.cus_typ,c.cus_sex
-                    ,c.cus_id_dat,c.cus_activity,c.cus_birthday ,to_char(c.cus_tel_no) cus_tel_no
+                    ,TRUNC(c.cus_id_dat),c.cus_activity ,to_char(c.cus_tel_no) cus_tel_no
                     ,to_char(c.mobil_no) mobil_no,c.id_gov_cod,c.birth_gov_cod bgc
                 from customer_tab c
                 where
@@ -751,8 +756,8 @@ class mainClass:
             good, err = [], []
             self.open_connect()
             cursor = self.connection.cursor()
-            # cursor.prefetchrows = 86789
-            # cursor.arraysize = 86788
+            cursor.prefetchrows = 1000001
+            cursor.arraysize = 1000000
             cursor.execute(cus_sql)
 
             print('start fetch')
@@ -762,8 +767,8 @@ class mainClass:
                 print("starting loop in rows")
                 for row in rows:
                     process(fix(list(row)))
-                    # print(
-                    #     f"good rows is : {len(good)} and errors rows is : {len(err)}")
+                print(
+                    f"good rows is : {len(good)} and errors rows is : {len(err)}")
             else:
                 print("starting loop in rows")
                 while True:
@@ -771,8 +776,8 @@ class mainClass:
                     if row is None:
                         break
                     process(fix(list(row)))
-                    # print(
-                    #     f"good rows is : {len(good)} and errors rows is : {len(err)}")
+                print(
+                    f"good rows is : {len(good)} and errors rows is : {len(err)}")
             writelog("err.txt", err)
             writelog("good.txt", good)
 
