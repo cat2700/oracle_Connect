@@ -2,23 +2,15 @@ from datetime import date as dt
 import datetime as dati
 import math
 
-row = ['$%^&',	910015000,	10908, '28201012106352', '19520112', '21', '1',
-       'ثريا مصطفى مصطفى غنيم',
-       '33 ش 146 المشروع الامريكى ب 10 ق 6 حلوان القاهرة',
-       '23 ش 146-المشروع الامريكى-ب10ق 6-حلولن -القاهرة',
-       1,	2,	99999999,	19005,
-       '', 1144075170,	1,	11,
-       ]
-error = []
-good = []
-civils = []
+row = ['$%^&',	910015000,	10908, '28201012106352', '19520112', '21', '10', '2']
+error, good, civils = [], [], []
 
 
 def process(row):
     try:
         # slicing row
-        row_rowID, row_br, row_cusNum, row_civil, row_birth, row_gov, row_rais = \
-            row[0], row[1], row[2], row[3], row[4], row[5], row[6]
+        row_rowID, row_br, row_cusNum, row_civil, row_birth, row_gov, row_rais, row_sex = \
+            row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7]
         # catch civil_no
         row_civilLength = len(row_civil)
         karn = row_civil[:1]
@@ -67,15 +59,15 @@ def process(row):
                 chk_dig = 1
             else:
                 chk_dig = 11 + third_round
-
         except Exception as er:
             chk_dig = None
+
     except Exception as er:
         print('error in catching')
 
-    print(karn, yy, mm, dd, civilBirthDate, BirthDate, type(
-        civilBirthDate), civilBirthDate.year, civil_gov, gov)
-    print("*" * 100)
+    # print(karn, yy, mm, dd, civilBirthDate, BirthDate, type(
+    #     civilBirthDate), civilBirthDate.year, civil_gov, gov)
+    # print("*" * 100)
 
     # chk for 14 digit
     if row_civilLength != 14:
@@ -120,8 +112,17 @@ def process(row):
         error.append(('10', 'رقم قومى غير صحيح م',
                       row_rowID, row_br, row_cusNum))
         return
+    # sex
+    elif row_sex == '' or row_sex not in ('1', '2'):
+        error.append(('', '',
+                      row_rowID, row_br, row_cusNum))
+        return
+    elif (int(row_sex) % 2 == 0 and int(civil_sx) != 2) or (int(row_sex) % 2 != 0 and int(civil_sx) != 1):
+        error.append(('', '',
+                      row_rowID, row_br, row_cusNum))
+        return
     elif row_civil in civils:
-        error.append(('11', 'رقم قومى مكرر',
+        error.append(('13', 'رقم قومى مكرر',
                       row_rowID, row_br, row_cusNum))
         return
     else:
