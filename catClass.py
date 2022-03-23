@@ -709,9 +709,10 @@ class mainClass:
 
             cus_sql = """
                 select c.rowid ,c.branch_no , c.cus_no ,c.cus_civil_no ,TRUNC(c.cus_birthday)
+                    ,c.birth_gov_cod bgc ,c.id_gov_cod
                     , c.cus_nam_l,c.cus_addr_l,c.addr_pos_l,c.cus_typ,c.cus_sex
                     ,TRUNC(c.cus_id_dat),c.cus_activity ,to_char(c.cus_tel_no) cus_tel_no
-                    ,to_char(c.mobil_no) mobil_no,c.id_gov_cod,c.birth_gov_cod bgc
+                    ,to_char(c.mobil_no) mobil_no
                 from customer_tab c
                 where
                 c.cus_kind = 0 and cus_opn_dat <= to_date('28/02/2022')
