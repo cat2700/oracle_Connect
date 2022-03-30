@@ -12,7 +12,7 @@ conf = cn.readConfig(configFileName="oracleConfig",
                      tags=['usrid', 'pass', 'sevice'])
 
 cn = catClass.mainClass(
-    uid=f'{conf[0]}', upsw=f'{conf[1]}', service_name=f'{conf[2]}')
+    uid=f'{conf[0]}', upsw=f'{conf[1]}', service_name=f'{conf[2]}', ip='172.29.107.44')
 # print(cn.open_connect())
 
 
@@ -192,6 +192,10 @@ cn = catClass.mainClass(
 
 
 # =======================================
+# start_time = time.time()
+# cn.procShmool(fetchAll=True)
+# print(f"---{time.time() - start_time} seconds ---")
+
 start_time = time.time()
-cn.procShmool(fetchAll=True)
+cn.ReadWalletFiles('a')
 print(f"---{time.time() - start_time} seconds ---")

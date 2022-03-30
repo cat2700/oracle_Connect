@@ -100,7 +100,7 @@ class mainClass:
                     return True
 
         except Exception as err:
-            return False, err, err.args
+            return False, str(err), err.args
         finally:
             self.close_connect()
 
@@ -520,6 +520,7 @@ class mainClass:
 
     def ReadWalletFiles(self, readKind=''):
         # Folders Details
+
         def kind(k):
             return {
                 'a': ['WA-path', 'WA-sql', 'WA_columnsHeader'],
@@ -569,27 +570,35 @@ class mainClass:
             # printq(dfSource)
             # print(type(dfSource))
             # print(len(dfSource))
-            # print(dfSource.fillna(value=''))
+            # dfSource.fillna(value='')
+            # dfSource.astype(str)
 
             # .astype(str) # .fillna(value='')
-            filter = dfSource.loc[:, colmnList].to_numpy()
-
+            # filter = dfSource.loc[:, colmnList].to_numpy()
+            filter = dfSource.loc[:, colmnList].fillna(
+                value='').to_numpy().astype(str)
             # print(filter)
             # print(type(filter))
 
-            return filter
+            return filter.tolist()
 
         """
             Starting Code
         """
-        if kind(readKind.lower()) == None:
-            print('invalid kind')
-            return
+        print('--')
+        # if kind(readKind.lower()) == None:
+        #     print('invalid kind')
+        #     return
         # get folders Details
-        FData = readConfig(kind(readKind.lower()))
-        FolderPath = FData[0].strip()
-        sqlST = FData[1].strip()
-        columnsHeader = list(FData[2].strip().replace(' ', '').split(','))
+        # FData = readConfig(kind(readKind.lower()))
+        # FolderPath = FData[0].strip()
+        # sqlST = FData[1].strip()
+        # columnsHeader = list(FData[2].strip().replace(' ', '').split(','))
+        FolderPath = r'D:\GitHub\oracle_Connect\walletA'
+        sqlST = 'insert into TEMP values (:1, :2, :3,:4,:5,:6,:7,:8,:9,:10)'
+        columnsHeader = ['hashed_MD5',	'Activation_Date',	'status_id',	'Balance',
+                         'National_ID',	'Mobile',	'terminal_id',	'bran',	'Last_TRX_Date', 'aa']
+        # print(FolderPath, sqlST, columnsHeader)
 
         if len(columnsHeader) == 0:
             print(
@@ -600,8 +609,30 @@ class mainClass:
         if len(fs) == 0:
             return False
         for f in fs:
-            L = list(readExcel(fil=f, colmnList=columnsHeader))
-            print(self.insertMany(sqlST, L))
+            try:
+                print(f'start with file: {f}')
+                L = readExcel(fil=f, colmnList=columnsHeader)
+                # print(L[:3])
+                T = list([tuple(e) for e in L])
+                n = 100000
+                print(len(T))
+                if len(T) > n:
+                    while True:
+                        print(f'starting insert {len(T[:n])}')
+                        print(self.insertMany(sqlST, T[:n]))
+                        T = T[n:]
+                        if len(T) < n:
+                            break
+                print('start insert')
+                print(self.insertMany(sqlST, T))
+                # print(T[:3])
+                # for f in L[:3]:
+                #     print(tuple(f))
+                # print('start insert')
+                # print(self.insertMany(sqlST, T))
+                # print(self.insertMany(sqlST, L))
+            except Exception as err:
+                print(f'error in file: {f} and error msg is : {err}')
 
     def readConfig(self, configFileName, tags=[]):
         try:
