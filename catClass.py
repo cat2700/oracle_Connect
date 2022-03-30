@@ -330,6 +330,7 @@ class mainClass:
         def devid_Data(df):
             print('staring devid_Data')
             dfs = []
+            rc = len(df)
             circle = int((rc // maxRowsNum) + 1)
             net = int(rc % maxRowsNum)
             x = 1
@@ -460,6 +461,10 @@ class mainClass:
                        'openingDate', 'nationalId', 'secondaryId', 'secondaryIdType', 'closingDate', 'statusId', 'statusReason']
         elif kind.strip().lower() == 'card':
             rowlabel = ['cards', 'card']
+            mapList = ['cardId', 'typeId', 'cardSchemaId', 'branchId', 'currencyId',
+                       'accountId', 'openingDate', 'nationalId', 'secondaryId', 'secondaryIdType',
+                       'parentCardId', 'parentNationalId', 'parentSecondryId', 'parentSecondryIdType',
+                       'closingDate', 'statusId', 'statusReason']
         else:
             print('please kind attr. required')
             return

@@ -196,6 +196,13 @@ cn = catClass.mainClass(
 # cn.procShmool(fetchAll=True)
 # print(f"---{time.time() - start_time} seconds ---")
 
+# start_time = time.time()
+# cn.ReadWalletFiles('a')
+# print(f"---{time.time() - start_time} seconds ---")
+
 start_time = time.time()
-cn.ReadWalletFiles('a')
+sql = """
+    select * from MEEZA_CIF_XML
+"""
+cn.convertToXML(kind='cust', fromOrcl=True, sql=sql, maxRowsNum=500000)
 print(f"---{time.time() - start_time} seconds ---")
