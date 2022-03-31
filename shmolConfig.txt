@@ -4,5 +4,5 @@ fromEx || 0
 filePathName || 
 sheetName || 0
 colList || 
-sql || select CUS_CIVIL_NO as nationalId,'' as secondaryId ,'' as secondaryIdType ,CUS_NAM_L as arabicName,'' as englishName ,CUS_BIRTHDAY as birthDate,birth_gov_cod as birthGovCode,id_gov_cod as residenceGovCode,'' ,'' from customer_tab_good_sh_1_22 sh where  substr(branch_no,1,3) in 901 
-maxRowsNum || 0
+sql || select * from MEEZA_CIF_XML where rownum < 10
+maxRowsNum || 500000

@@ -13,7 +13,10 @@ conf = cn.readConfig(configFileName="oracleConfig",
 
 cn = catClass.mainClass(
     uid=f'{conf[0]}', upsw=f'{conf[1]}', service_name=f'{conf[2]}', ip='172.29.107.44')
-print(cn.open_connect())
+if cn.open_connect():
+    print('oracle connected')
+else:
+    print('error in connected')
 
 
 # print(cn.close_connect())
@@ -200,11 +203,17 @@ print(cn.open_connect())
 # cn.ReadWalletFiles('a')
 # print(f"---{time.time() - start_time} seconds ---")
 
-start_time = time.time()
-sql = """
-    select * from MEEZA_CIF_XML
-"""
-cn.convertToXML(kind='cust', fromOrcl=True, sql=sql, maxRowsNum=500000)
-print(f"---{time.time() - start_time} seconds ---")
+# start_time = time.time()
+# sql = """
+#     select * from MEEZA_CIF_XML
+#     where rownum < 10
+# """
+# cn.convertToXML(kind='cust', fromOrcl=True, sql=sql, maxRowsNum=500000)
+# print(f"---{time.time() - start_time} seconds ---")
 
-# print('='*100)
+# ==>  pyinstaller run.py --onefile --noconsole --debug=all
+conf = cn.readConfig(configFileName="shmolConfig",
+                     tags=['kind', 'fromOrcl', 'fromEx', 'filePathName', 'sheetName', 'colList', 'sql', 'maxRowsNum'])
+
+cn.convertToXML(kind=conf[0], fromOrcl=bool(int(conf[1])), fromEx=bool(int(conf[2])), filePathName=str(conf[3]),
+                sheetName=int(conf[4]), colList=list(conf[5]), sql=str(conf[6]), maxRowsNum=int(conf[7]))

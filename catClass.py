@@ -251,7 +251,7 @@ class mainClass:
     def convertToXML(self, kind='', fromOrcl=False, fromEx=False,  filePathName='', sheetName=0, colList=[], sql='', maxRowsNum=0):
 
         def ExpOrcl(sqlST):
-            print('staring ExpOrcl')
+            print('starting ExpOrcl')
 
             rs = self.runSQL(sqlST)
             if not rs[0]:
@@ -264,7 +264,7 @@ class mainClass:
             return filter, rc
 
         def aftr_orcl_exprt(da):
-            print('staring aftr_orcl_exprt')
+            print('starting aftr_orcl_exprt')
             convAnd = 0  # to store count of cells who convert the & in it
             # convert tuple to list
             for indx, item in enumerate(da):
@@ -297,7 +297,7 @@ class mainClass:
         # ==> getAllExcelFiles
 
         def getAllExcFiles(exten=('xls', 'xlsx')):
-            print('staring getAllExcFiles')
+            print('starting getAllExcFiles')
             fils = []
             mypath = os.curdir
             for f in listdir(mypath):
@@ -307,7 +307,7 @@ class mainClass:
 
         # ==> export data from excel file
         def ExpExl(FPathName):
-            print('staring ExpExl')
+            print('starting ExpExl')
             dfSource = pn.read_excel(
                 FPathName, sheet_name=sheetName, usecols=colList, dtype=str)  # skiprows=range(1, 175000)
             # Rows Count
@@ -328,7 +328,7 @@ class mainClass:
 
         # ==> deviding data
         def devid_Data(df):
-            print('staring devid_Data')
+            print('starting devid_Data')
             dfs = []
             rc = len(df)
             circle = int((rc // maxRowsNum) + 1)
@@ -349,7 +349,7 @@ class mainClass:
         # preExportXml
 
         def preExportXML(df, rc):
-            print('staring preExportXML')
+            print('starting preExportXML')
             # ==> set rows before export xml
             if (rc <= maxRowsNum and maxRowsNum == 0) or maxRowsNum == 0:
                 # exportXML(df)
@@ -360,7 +360,7 @@ class mainClass:
 
         # ==> Import data to XML file
         def exportXML(Data, uniqNam):
-            print('staring exportXML')
+            print('starting exportXML')
 
             # row = ''
             # baseData = ''
@@ -421,7 +421,7 @@ class mainClass:
             pyFile.close()
 
         def netXML(Data):
-            print('staring netXML')
+            print('starting netXML')
 
             A = et.Element(rowlabel[0])
             for rows in Data:
@@ -478,6 +478,7 @@ class mainClass:
                      f'<noOf{rowlabel[0]}>', f'</noOf{rowlabel[0]}>']
 
         if fromEx:
+            print('start from excel')
             # ==> store filePathName as a list
             spl = list(filePathName.split('\\'))
             # ==> Extract from excel
@@ -506,6 +507,7 @@ class mainClass:
                             exportXML(d, spl[-1].split('.')[0].lower())
 
         elif fromOrcl and sql != '':
+            print('start from oracl')
             tmp = ExpOrcl(sql)
             tmp1, tmp2 = tmp[0], tmp[1]
             # chick for columns count
@@ -522,6 +524,7 @@ class mainClass:
             else:
                 for d in temp2:
                     exportXML(d, '')
+        print('finished')
 
     def ReadWalletFiles(self, readKind=''):
         # Folders Details
