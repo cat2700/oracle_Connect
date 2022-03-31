@@ -13,7 +13,7 @@ conf = cn.readConfig(configFileName="oracleConfig",
 
 cn = catClass.mainClass(
     uid=f'{conf[0]}', upsw=f'{conf[1]}', service_name=f'{conf[2]}', ip='172.29.107.44')
-# print(cn.open_connect())
+print(cn.open_connect())
 
 
 # print(cn.close_connect())
@@ -206,3 +206,5 @@ sql = """
 """
 cn.convertToXML(kind='cust', fromOrcl=True, sql=sql, maxRowsNum=500000)
 print(f"---{time.time() - start_time} seconds ---")
+
+# print('='*100)
