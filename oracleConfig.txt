@@ -1,3 +1,4 @@
-usrid || cat
+usrid || arabank
 pass || icl
 sevice || oracl2k
+ip || 127.0.0.1

@@ -212,8 +212,10 @@ else:
 # print(f"---{time.time() - start_time} seconds ---")
 
 # ==>  pyinstaller run.py --onefile --noconsole --debug=all
-conf = cn.readConfig(configFileName="shmolConfig",
-                     tags=['kind', 'fromOrcl', 'fromEx', 'filePathName', 'sheetName', 'colList', 'sql', 'maxRowsNum'])
+# conf = cn.readConfig(configFileName="shmolConfig",
+#                      tags=['kind', 'fromOrcl', 'fromEx', 'filePathName', 'sheetName', 'colList', 'sql', 'maxRowsNum'])
 
-cn.convertToXML(kind=conf[0], fromOrcl=bool(int(conf[1])), fromEx=bool(int(conf[2])), filePathName=str(conf[3]),
-                sheetName=int(conf[4]), colList=list(conf[5]), sql=str(conf[6]), maxRowsNum=int(conf[7]))
+# cn.convertToXML(kind=conf[0], fromOrcl=bool(int(conf[1])), fromEx=bool(int(conf[2])), filePathName=str(conf[3]),
+#                 sheetName=int(conf[4]), colList=list(conf[5]), sql=str(conf[6]), maxRowsNum=int(conf[7]))
+
+

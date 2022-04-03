@@ -838,3 +838,17 @@ class mainClass:
             return False
         finally:
             self.close_connect()
+
+    def exportOrclExc(self, sql, excelName, sheetName):
+        try:
+            store = self.runSQL(sql)
+            if not store[0]:
+                print(store[0])
+                return
+            print(store[1], type(store[2]))
+            df = pn.DataFrame(store[2])
+            df.to_excel(excelName, sheet_name=sheetName)
+            print('Expored !!!')
+        except Exception as err:
+            print(f'error in exportOrclExc: {err}')
+            return False
