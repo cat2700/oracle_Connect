@@ -16,6 +16,7 @@ from os.path import isfile, join
 from os import listdir
 # from xml.dom.minidom import parseString
 from datetime import datetime
+from cryptography.fernet import Fernet
 
 
 class mainClass:
@@ -526,7 +527,35 @@ class mainClass:
                     exportXML(d, '')
         print('finished')
 
-    def ReadWalletFiles(self, readKind=''):
+    def encrOrDecr(self, msg, decrpt=False):
+        try:
+            key = 'E7lFOU4SfA5Ifat9A44xyK0EcSgQvEXcuI4bfYQf6NI='
+
+            def encrypt_message(message):
+                """
+                Encrypts a message
+                """
+                encoded_message = message.encode()
+                f = Fernet(key)
+                encrypted_message = f.encrypt(encoded_message)
+                return encrypted_message
+
+            def decrypt_message(encrypted_message):
+                """
+                Decrypts an encrypted message
+                """
+                f = Fernet(key)
+                decrypted_message = f.decrypt(encrypted_message)
+                return decrypted_message.decode()
+
+            if not decrpt:  # Encrypt Mode
+                return encrypt_message(msg).decode('utf_8')
+            elif decrpt:  # Decrypt Mode
+                return decrypt_message(msg.encode('utf_8'))
+        except Exception as err:
+            return str(err), err.args
+
+    def ReadWalletFiles(self, readKind='', encryptedData=False):
         # Folders Details
 
         def kind(k):
@@ -642,7 +671,7 @@ class mainClass:
             except Exception as err:
                 print(f'error in file: {f} and error msg is : {err}')
 
-    def readConfig(self, configFileName, tags=[]):
+    def readConfig(self, configFileName, tags=[], isEncrypt=False):
         try:
             cd = os.curdir + f"\\{configFileName}.txt"
             rf = open(cd, 'r')
