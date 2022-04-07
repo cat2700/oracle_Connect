@@ -17,6 +17,7 @@ from os import listdir
 # from xml.dom.minidom import parseString
 from datetime import datetime
 from cryptography.fernet import Fernet
+import math
 
 
 class mainClass:
@@ -88,7 +89,7 @@ class mainClass:
         finally:
             self.close_connect()
 
-    def insertMany(self, SQLst, values=[]):
+    def insertMany(self, SQLst, values=[], bulkRowsLimit=100000):
         try:
             if SQLst == '':
                 return False
@@ -96,6 +97,16 @@ class mainClass:
                 self.open_connect()
                 cursor = self.connection.cursor()
                 if SQLst.lstrip().lower()[:2] in ('in') and len(values) > 0:
+                    if len(values) > bulkRowsLimit:
+                        while True:
+                            print(
+                                f'starting insert {len(values[:bulkRowsLimit])}')
+                            cursor.executemany(SQLst, values[:bulkRowsLimit])
+                            self.connection.commit()
+                            values = values[bulkRowsLimit:]
+                            if len(values) < bulkRowsLimit:
+                                break
+                    print('start insert')
                     cursor.executemany(SQLst, values)
                     self.connection.commit()
                     return True
@@ -555,7 +566,7 @@ class mainClass:
         except Exception as err:
             return str(err), err.args
 
-    def ReadWalletFiles(self, readKind='', encryptedData=False):
+    def ReadExcelFilesintoOrcl(self, readKind='', encryptedData=False):
         # Folders Details
 
         def kind(k):
@@ -651,15 +662,15 @@ class mainClass:
                 L = readExcel(fil=f, colmnList=columnsHeader)
                 # print(L[:3])
                 T = list([tuple(e) for e in L])
-                n = 100000
-                print(len(T))
-                if len(T) > n:
-                    while True:
-                        print(f'starting insert {len(T[:n])}')
-                        print(self.insertMany(sqlST, T[:n]))
-                        T = T[n:]
-                        if len(T) < n:
-                            break
+                # n = 100000
+                # print(len(T))
+                # if len(T) > n:
+                #     while True:
+                #         print(f'starting insert {len(T[:n])}')
+                #         print(self.insertMany(sqlST, T[:n]))
+                #         T = T[n:]
+                #         if len(T) < n:
+                #             break
                 print('start insert')
                 print(self.insertMany(sqlST, T))
                 # print(T[:3])
@@ -712,23 +723,138 @@ class mainClass:
                         A = item.replace(r"&", r"-")
                         row[indx] = A
                 return row
-            # process the procedure
 
+            # process the procedure
             def process(row):
-                # chk for 14 digit
-                if len(row[3]) != 14:
-                    err.append(('1', 'not equal 14 digit',
-                                row[0], row[1], row[2]))
+                try:
+                    try:
+                        # slicing row
+                        row_rowID, row_br, row_cusNum, row_civil, row_birth, row_gov, row_rais, row_sex = \
+                            row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7]
+                        # catch civil_no
+                        row_civilLength = len(row_civil)
+                        karn = row_civil[:1]
+                        if karn == '2':
+                            K = '19'
+                        elif karn == '3':
+                            K = '20'
+                        else:
+                            k = '99'
+                        yy = row_civil[1:3]
+                        mm = row_civil[3:5]
+                        dd = row_civil[5:7]
+                        try:
+                            civilBirthDate = dt(
+                                year=int(str(K) + str(yy).zfill(2)), month=int(str(mm).zfill(2)), day=int(str(dd).zfill(2)))
+                        except Exception as er:
+                            civilBirthDate = None
+                        civil_sx = row_civil[12:13]
+                        civil_gov = row_civil[7:9]
+                        # catch birth day
+                        try:
+                            BirthDate = dt(
+                                year=int(row_birth[:4]), month=int(row_birth[4:6]), day=int(row_birth[6:8]))
+                        except Exception as er:
+                            BirthDate = None
+                        # catch gov code
+                        gov = str(row_gov).zfill(2)
+                        ris_gov = str(row_rais).zfill(2)
+                        gov_tbl = ['01', '02', '03', '04', '05', '06', '11', '12', '13', '14', '15', '16', '17', '18', '19', '21', '22', '23', '24', '25', '26', '27', '28', '29', '31', '32', '33', '34', '35', '88'
+                                   ]
+                        # ==> chk digit
+                        try:
+                            first_round = int(row_civil[0:1]) * 2 + int(row_civil[1:2]) * \
+                                7 + int(row_civil[2:3]) * 6 + int(row_civil[3:4]) * \
+                                5 + int(row_civil[4:5]) * 4 + int(row_civil[5:6]) * \
+                                3 + int(row_civil[6:7]) * 2 + int(row_civil[7:8]) * \
+                                7 + int(row_civil[8:9]) * 6 + int(row_civil[9:10]) * \
+                                5 + int(row_civil[10:11]) * 4 + int(row_civil[11:12]) * \
+                                3 + int(row_civil[12:13]) * 2
+                            current_chk_dig = int(row_civil[13:14])
+                            chk_dig_civ = int(row_civil[13:14])
+                            second_round = math.trunc(first_round/11)
+                            third_round = second_round * 11 - first_round
+
+                            if third_round == 0:
+                                chk_dig = 1
+                            else:
+                                chk_dig = 11 + third_round
+                        except Exception as er:
+                            # print(False, str(er), er.args)
+                            chk_dig = None
+
+                    except Exception as er:
+                        print(f'error in catching row: {row}')
+                        return
+
+                    # print(karn, yy, mm, dd, civilBirthDate, BirthDate, type(
+                    #     civilBirthDate), civilBirthDate.year, civil_gov, gov)
+                    # print("*" * 100)
+
+                    # chk for 14 digit
+                    if row_civilLength != 14:
+                        error.append(('1', 'رقم بالرقم القومي - لا يساوي 14',
+                                      row_rowID, row_br, row_cusNum))
+                        return
+                    elif karn not in ('2', '3'):
+                        error.append(('2', 'خطا بالرقم القومي - رقم القرن',
+                                      row_rowID, row_br, row_cusNum))
+                        return
+                    elif civilBirthDate == None or BirthDate == None:
+                        error.append(('3', 'تاريخ الميلاد غير صحيح',
+                                      row_rowID, row_br, row_cusNum))
+                        return
+                    elif civilBirthDate != BirthDate:
+                        error.append(('4', 'تاريخ الميلاد المسجل لا يتطابق مع الرقم القومي',
+                                      row_rowID, row_br, row_cusNum))
+                        return
+                    elif civilBirthDate.year > dt.today().year or (karn == '2' and civilBirthDate.year < 1920):
+                        error.append(('5', 'خطا بالرقم القومي - سنة الميلاد',
+                                      row_rowID, row_br, row_cusNum))
+                        return
+                    # التأكد من رقم المحافظة
+                    elif civil_gov != gov:
+                        error.append(('6', 'رقم محافظة الميلاد غير متطابق بالرقم القومي',
+                                      row_rowID, row_br, row_cusNum))
+                        return
+                    elif civil_gov not in gov_tbl:
+                        error.append(('7', 'رقم محافظة الميلاد غير موجود بجدول المحافظات',
+                                      row_rowID, row_br, row_cusNum))
+                        return
+                    elif ris_gov not in gov_tbl:
+                        error.append(('8', 'رقم محافظة السكن غير موجود بجدول المحافظات',
+                                      row_rowID, row_br, row_cusNum))
+                        return
+                    # chick civile digit
+                    elif chk_dig == None:
+                        error.append(('9', 'رقم قومى يحتوى على حروف خاصة',
+                                      row_rowID, row_br, row_cusNum))
+                        return
+                    elif chk_dig != chk_dig_civ:
+                        error.append(('10', 'رقم قومى غير صحيح م',
+                                      row_rowID, row_br, row_cusNum))
+                        return
+                    # sex
+                    elif row_sex == '' or row_sex not in ('1', '2'):
+                        error.append(('11', 'حقل الجنس غير صحيح',
+                                      row_rowID, row_br, row_cusNum))
+                        return
+                    elif (int(civil_sx) % 2 == 0 and int(row_sex) != 2) or (int(civil_sx) % 2 != 0 and int(row_sex) != 1):
+                        error.append(('12', 'حقل الجنس غير متوافق مع الرقم القومي',
+                                      row_rowID, row_br, row_cusNum))
+                        return
+                    elif row_civil in civils:
+                        error.append(('13', 'رقم قومى مكرر',
+                                      row_rowID, row_br, row_cusNum))
+                        return
+                    else:
+                        good.append((row_rowID, row_br, row_cusNum))
+                        civils.append(row_civil)
+                except Exception as er:
+                    print('error in process row {row}')
                     return
-                # elif row[3] == None or row[3] == '' or row[3] == '0':
-                #     err.append(('2', 'لا يوجد رقم قومى',
-                #                 row[0], row[1], row[2]))
-                #     return
-                else:
-                    good.append((row[0], row[1], row[2]))
 
             # drop and create good and errors tabels
-
             def dropAndCreateTBL():
                 sql = """begin
                                 execute immediate 'DROP TABLE customer_tab_error';
@@ -775,7 +901,8 @@ class mainClass:
                 finally:
                     rf.close()
 
-            cus_sql = """
+            dat = '31/03/2022'
+            cus_sql = f"""
                 select c.rowid ,c.branch_no , c.cus_no ,c.cus_civil_no ,TRUNC(c.cus_birthday)
                     ,c.birth_gov_cod bgc ,c.id_gov_cod ,c.cus_sex
                     --, c.cus_nam_l,c.cus_addr_l,c.addr_pos_l,c.cus_typ
@@ -783,7 +910,7 @@ class mainClass:
                     --,to_char(c.mobil_no) mobil_no
                 from customer_tab c
                 where
-                c.cus_kind = 0 and cus_opn_dat <= to_date('28/02/2022')
+                c.cus_kind = 0 and cus_opn_dat <= to_date('{dat}')
                 and branch_no not in( 905001080,919009000)
                 and   (branch_no,cus_no) in
                 (
@@ -795,12 +922,12 @@ class mainClass:
                     union
 
                     select  branch_no , cus_no from crt_bal c
-                    where certif_flg in (1,2) and to_dat > '28/02/2022'
+                    where certif_flg in (1,2) and to_dat > '{dat}'
 
                     union
 
                     select  branch_no , cus_no from deposit_tab d
-                    where dp_upd_dsg not in (2,4,6) and dp_dlt_dt is null and dp_val_dt > '28/02/2022'
+                    where dp_upd_dsg not in (2,4,6) and dp_dlt_dt is null and dp_val_dt > '{dat}'
 
                     union
 
@@ -819,11 +946,12 @@ class mainClass:
                 and c.id_gov_cod in (select lpad(g.gov_id,2,0) from gov_tab g)
                 and substr(c.cus_civil_no,8,2) = to_char(c.birth_gov_cod)
                 and substr(c.cus_civil_no,2,6) = to_char(c.cus_birthday,'YYMMDD')
-                --and substr(c.branch_no,1,3) in (910)
+                --and c.branch_no in (910004000)
+                --and rownum < 10
             """
             print('define cursor')
-            good, err = [], []
-            self.open_connect()
+            error, good, civils = [], [], []
+            print(self.open_connect())
             cursor = self.connection.cursor()
             cursor.prefetchrows = 1000001
             cursor.arraysize = 1000000
@@ -837,7 +965,7 @@ class mainClass:
                 for row in rows:
                     process(fix(list(row)))
                 print(
-                    f"good rows is : {len(good)} and errors rows is : {len(err)}")
+                    f"good rows is : {len(good)} and errors rows is : {len(error)}")
             else:
                 print("starting loop in rows")
                 while True:
@@ -846,22 +974,24 @@ class mainClass:
                         break
                     process(fix(list(row)))
                 print(
-                    f"good rows is : {len(good)} and errors rows is : {len(err)}")
-            writelog("err.txt", err)
+                    f"good rows is : {len(good)} and errors rows is : {len(error)}")
+            writelog("err.txt", error)
             writelog("good.txt", good)
 
+            print('start dropAndCreateTBL')
             dropAndCreateTBL()
             # posting errors data
+            print('posting errors data')
             ersql = """insert into customer_tab_error
                     values (:1,:2,:3,:4,:5) 
                     """
-            print(self.insertMany(ersql, err))
+            print(self.insertMany(ersql, error))
             godsql = """insert into customer_tab_good
                     values (:1,:2,:3) 
                     """
             print(self.insertMany(godsql, good))
 
-            return
+            print('Finished !!!')
         except Exception as err:
             print(f'error in cursor: {err}')
             return False

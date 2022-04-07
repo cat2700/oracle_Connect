@@ -1,6 +1,6 @@
 
 import catClass
-# from datetime import datetime
+from datetime import datetime
 # import datetime
 import threading
 import time
@@ -9,10 +9,10 @@ import time
 cn = catClass.mainClass()
 
 conf = cn.readConfig(configFileName="oracleConfig",
-                     tags=['usrid', 'pass', 'sevice'])
+                     tags=['usrid', 'pass', 'sevice', 'ip'])
 
 cn = catClass.mainClass(
-    uid=f'{conf[0]}', upsw=f'{conf[1]}', service_name=f'{conf[2]}', ip='172.29.107.44')
+    uid=f'{conf[0]}', upsw=f'{conf[1]}', service_name=f'{conf[2]}', ip=f'{conf[3]}')
 if cn.open_connect():
     print('oracle connected')
 else:
@@ -195,9 +195,10 @@ else:
 
 
 # =======================================
-# start_time = time.time()
-# cn.procShmool(fetchAll=True)
-# print(f"---{time.time() - start_time} seconds ---")
+start_time = time.time()
+print(datetime.today().hour,datetime.today().minute,datetime.today().second)
+cn.procShmool()
+print(f"---{time.time() - start_time} seconds ---")
 
 # start_time = time.time()
 # cn.ReadWalletFiles('a')
@@ -217,5 +218,3 @@ else:
 
 # cn.convertToXML(kind=conf[0], fromOrcl=bool(int(conf[1])), fromEx=bool(int(conf[2])), filePathName=str(conf[3]),
 #                 sheetName=int(conf[4]), colList=list(conf[5]), sql=str(conf[6]), maxRowsNum=int(conf[7]))
-
-
