@@ -195,22 +195,31 @@ else:
 
 
 # =======================================
-start_time = time.time()
-print(datetime.today().hour,datetime.today().minute,datetime.today().second)
-cn.procShmool()
-print(f"---{time.time() - start_time} seconds ---")
+# start_time = time.time()
+# print(datetime.today().hour,datetime.today().minute,datetime.today().second)
+# cn.procShmool()
+# print(f"---{time.time() - start_time} seconds ---")
 
 # start_time = time.time()
 # cn.ReadWalletFiles('a')
 # print(f"---{time.time() - start_time} seconds ---")
 
-# start_time = time.time()
+start_time = time.time()
 # sql = """
-#     select * from MEEZA_CIF_XML
-#     where rownum < 10
+#     select * from MEEZA_CIF_XML_bk
+#     --where rownum < 10
 # """
-# cn.convertToXML(kind='cust', fromOrcl=True, sql=sql, maxRowsNum=500000)
-# print(f"---{time.time() - start_time} seconds ---")
+sql = """
+    SELECT * FROM MEEZA_CARDS_XML WHERE BRANCH_CCH NOT IN (
+        6023,6513,6539,6263,6372,6858,6428,7041,6892,7057,6236,6248,6990,6694,6717,6864,6697,
+        6379,6776,6349,6194,6969,6950,7080,6273,6068,6351,6311,6456,6412,7111,6979,7034,7098,
+        6381,6203,6929,6871,7101,7134,6877,6195,6088,6438,6808,6792,6442,6327,6099,6854,7071,
+        7052,6882,6079,6688,6101,6340,6970,6961,6837,6820,7073,7064,7007,7119,6483,6323,6253,
+        7010,6842,6865,6853,6939,6488,7115,6422,6471,6714,6725,6698,6708
+    )
+"""
+cn.convertToXML(kind='card', fromOrcl=True, sql=sql, maxRowsNum=500000)
+print(f"---{time.time() - start_time} seconds ---")
 
 # ==>  pyinstaller run.py --onefile --noconsole --debug=all
 # conf = cn.readConfig(configFileName="shmolConfig",
