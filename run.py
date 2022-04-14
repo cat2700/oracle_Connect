@@ -205,10 +205,7 @@ else:
 # print(f"---{time.time() - start_time} seconds ---")
 
 start_time = time.time()
-# sql = """
-#     select * from MEEZA_CIF_XML_bk
-#     --where rownum < 10
-# """
+
 sql = """
     SELECT * FROM MEEZA_CARDS_XML WHERE BRANCH_CCH NOT IN (
         6023,6513,6539,6263,6372,6858,6428,7041,6892,7057,6236,6248,6990,6694,6717,6864,6697,
@@ -220,10 +217,3 @@ sql = """
 """
 cn.convertToXML(kind='card', fromOrcl=True, sql=sql, maxRowsNum=500000)
 print(f"---{time.time() - start_time} seconds ---")
-
-# ==>  pyinstaller run.py --onefile --noconsole --debug=all
-# conf = cn.readConfig(configFileName="shmolConfig",
-#                      tags=['kind', 'fromOrcl', 'fromEx', 'filePathName', 'sheetName', 'colList', 'sql', 'maxRowsNum'])
-
-# cn.convertToXML(kind=conf[0], fromOrcl=bool(int(conf[1])), fromEx=bool(int(conf[2])), filePathName=str(conf[3]),
-#                 sheetName=int(conf[4]), colList=list(conf[5]), sql=str(conf[6]), maxRowsNum=int(conf[7]))

@@ -542,7 +542,7 @@ class mainClass:
         try:
             key = 'E7lFOU4SfA5Ifat9A44xyK0EcSgQvEXcuI4bfYQf6NI='
 
-            def encrypt_message(message):
+            def encrypt_message(self, message):
                 """
                 Encrypts a message
                 """
