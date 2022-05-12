@@ -18,6 +18,9 @@ from os import listdir
 from datetime import datetime
 from cryptography.fernet import Fernet
 import math
+import xlrd
+import xlwt
+from xlutils.copy import copy
 
 
 class mainClass:
@@ -1010,4 +1013,91 @@ class mainClass:
             print('Expored !!!')
         except Exception as err:
             print(f'error in exportOrclExc: {err}')
+            return False
+
+    def sendMail(self, SPathName):
+        import smtplib
+        from email.mime.multipart import MIMEMultipart
+        from email.mime.base import MIMEBase
+        from email.mime.text import MIMEText
+        from email import encoders
+
+        # FILE TO SEND AND ITS PATH
+        # filename = 'some_file.csv'
+        # SourcePathName  = 'C:/reports/' + filename
+        SourcePathName = SPathName
+
+        msg = MIMEMultipart()
+        msg['From'] = 'haitham.maged@abe.com.eg'
+        msg['To'] = 'y.mostafa@abe.com.eg'
+        msg['Subject'] = 'From Python'
+        body = 'Hello'
+        msg.attach(MIMEText(body, 'plain'))
+
+        # ATTACHMENT PART OF THE CODE IS HERE
+        # attachment = open(SourcePathName, 'rb')
+        # part = MIMEBase('application', "octet-stream")
+        # part.set_payload((attachment).read())
+        # encoders.encode_base64(part)
+        # part.add_header('Content-Disposition',
+        #                 "attachment; filename= %s" % filename)
+        # msg.attach(part)
+        # put your relevant SMTP here
+        server = smtplib.SMTP('smtp.office365.com', 587)
+        print("Done to here")
+        server.ehlo()
+        server.starttls()
+        server.ehlo()
+        server.login('haitham.maged@abe.com.eg', 'cat *2022')  # if applicable
+        server.send_message(msg)
+        server.quit()
+        print("Sent !!!")
+
+    def report5040(self, Month, Year):
+        try:
+            # Get Data
+
+            self.__init__(uid='arabank', upsw='icl',
+                          service_name='orcltst', ip='172.29.233.10')
+            if not self.open_connect():
+                return
+
+            sss = f"""
+                select count(*),sum(tr_amt) 
+                from trans_client_tit_tab 
+                where cus_no is not null and internal_cus_no  <> 0 and ready_status=1
+                and extract (month from tr_due_date)={Month} and extract (year from tr_due_date) = {Year}
+
+            """
+            result = self.runSQL(sss)
+
+            mount = math.trunc(int(result[2][0][1])/1000)
+            count = math.trunc(int(result[2][0][0]))
+
+            print(f'The Mount is: {mount}')
+            print(f'The Count is: {count}')
+
+            fDir = os.curdir + f"\\5040\\DOC_5040.xls"
+            # Make Readable Copy
+            read_book = xlrd.open_workbook(fDir, formatting_info=True)
+            # Make Writeable Copy
+            write_book = copy(read_book)
+            # Get sheet 1 in writeable copy
+            write_sheet1 = write_book.get_sheet(0)
+            # Write 'test' to cell (c, 27)
+            write_sheet1.write(20, 1, f'{Month}-{Year}')
+            write_sheet1.write(26, 2, mount)
+            write_sheet1.write(26, 3, count)
+
+            # Save the newly written copy. Enter the same as the old path to write over
+            # rrr = rn.randint(10000, 99999)
+            nFile = os.curdir + f"\\5040\\DOC_5040-{Month}-{Year}.xls"
+            write_book.save(nFile)
+
+            # Send Mail
+            # self.sendMail(nFile)
+            # y.mostafa@abe.com.eg
+            print('Finished !!!')
+        except Exception as err:
+            print(False, str(err), err.args)
             return False

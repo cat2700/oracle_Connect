@@ -4,6 +4,10 @@ from datetime import datetime
 # import datetime
 import threading
 import time
+import math
+
+
+start_time = time.time()
 
 
 cn = catClass.mainClass()
@@ -204,16 +208,83 @@ else:
 # cn.ReadWalletFiles('a')
 # print(f"---{time.time() - start_time} seconds ---")
 
-start_time = time.time()
 
-sql = """
-    SELECT * FROM MEEZA_CARDS_XML WHERE BRANCH_CCH NOT IN (
-        6023,6513,6539,6263,6372,6858,6428,7041,6892,7057,6236,6248,6990,6694,6717,6864,6697,
-        6379,6776,6349,6194,6969,6950,7080,6273,6068,6351,6311,6456,6412,7111,6979,7034,7098,
-        6381,6203,6929,6871,7101,7134,6877,6195,6088,6438,6808,6792,6442,6327,6099,6854,7071,
-        7052,6882,6079,6688,6101,6340,6970,6961,6837,6820,7073,7064,7007,7119,6483,6323,6253,
-        7010,6842,6865,6853,6939,6488,7115,6422,6471,6714,6725,6698,6708
-    )
-"""
-cn.convertToXML(kind='card', fromOrcl=True, sql=sql, maxRowsNum=500000)
+# sql = """
+#     SELECT * FROM MEEZA_CARDS_XML WHERE BRANCH_CCH NOT IN (
+#         6023,6513,6539,6263,6372,6858,6428,7041,6892,7057,6236,6248,6990,6694,6717,6864,6697,
+#         6379,6776,6349,6194,6969,6950,7080,6273,6068,6351,6311,6456,6412,7111,6979,7034,7098,
+#         6381,6203,6929,6871,7101,7134,6877,6195,6088,6438,6808,6792,6442,6327,6099,6854,7071,
+#         7052,6882,6079,6688,6101,6340,6970,6961,6837,6820,7073,7064,7007,7119,6483,6323,6253,
+#         7010,6842,6865,6853,6939,6488,7115,6422,6471,6714,6725,6698,6708
+#     )
+# """
+# cn.convertToXML(kind='card', fromOrcl=True, sql=sql, maxRowsNum=500000)
+
+
+# sss = """
+#   select count(*)
+#   from  (select * from customer_tab union all select * from customer_tab@islamic_31032022) c
+
+# where  c.cus_kind = 0 and cus_opn_dat <= to_date('31/03/2022') and branch_no not in( 905001080,919009000)
+# and   (branch_no,cus_no) not in (
+
+#     select branch_no , cus_no from bal_cr_tab b
+#     where --bal_blnc >0 and
+#     bal_close_dt is null
+
+#     union
+
+#     select branch_no , cus_no from bal_cr_tab@islamic_31032022 b
+#     where --bal_blnc >0 and
+#     bal_close_dt is null
+
+#     union
+
+#     select  branch_no , cus_no from crt_bal c
+#     where certif_flg in (1,2) and to_dat > '31/03/2022'
+
+#     union
+
+#     select  branch_no , cus_no from crt_bal@islamic_31032022 c
+#     where certif_flg in (1,2)  and to_dat > '31/03/2022'
+
+#     union
+
+#     select  branch_no , cus_no from deposit_tab d
+#     where dp_upd_dsg not in (2,4,6) and dp_dlt_dt is null and dp_val_dt > '31/03/2022'
+
+#     union
+
+#     select  branch_no , cus_no from deposit_s_tab@islamic_31032022 d
+#     where dp_upd_dsg not in (2,4,6) and dp_dlt_dt is null and dp_val_dt > '31/03/2022'
+
+#     union
+#     select  branch_no , cus_no from LON_MASTER LS
+#     where  LOAN_STATUS not in (2,6,9)
+
+#     union
+#     select branch_no , cus_no from bal_DB_tab DB
+#     where  --bal_blnc >0 and
+#     bal_close_dt is null
+
+#     union
+#     select branch_no , cus_no from bal_DB_tab@islamic_31032022 DB
+#     where  --bal_blnc >0 and
+#     bal_close_dt is null
+#     )
+#     --and c.cus_civil_no not in (select cus_civil_no from CUSTOMER_TAB_shmol_rej)
+#     and c.cus_nationalt = 1
+#     and substr(c.cus_civil_no,8,2) in (select lpad(g.gov_id,2,0) from gov_tab g)
+#     and c.id_gov_cod in (select lpad(g.gov_id,2,0) from gov_tab g)
+#     and substr(c.cus_civil_no,8,2) = to_char(lpad(c.birth_gov_cod,2,0))
+#     and substr(c.cus_civil_no,2,6) = to_char(c.cus_birthday,'YYMMDD')
+
+# """
+# result = cn.runSQL(sss)
+# print(result[0])
+# print(result[2])
+
+
+cn.report5040(4, 2022)
+
 print(f"---{time.time() - start_time} seconds ---")
