@@ -285,6 +285,8 @@ else:
 # print(result[2])
 
 
-cn.report5040(4, 2022)
+# cn.report5040(5, 2022)
+
+print(cn.open_connect())
 
 print(f"---{time.time() - start_time} seconds ---")

@@ -1,0 +1,132 @@
+	create table CUSTOMER_TAB_GOOD_SH
+    (
+    branch_no         NUMBER(10) not null,
+    cus_no            NUMBER(10) not null,
+    cus_nam_l         VARCHAR2(60),
+    cus_nam_f         VARCHAR2(60),
+    cus_tit_l         VARCHAR2(10),
+    cus_tit_f         VARCHAR2(10),
+    cus_addr_l        VARCHAR2(70),
+    cus_addr_f        VARCHAR2(70),
+    addr_pos_l        VARCHAR2(150),
+    addr_pos_f        VARCHAR2(150),
+    cus_tel_no        VARCHAR2(10),
+    cus_nationalt     NUMBER(5),
+    cus_id_card       VARCHAR2(20),
+    cus_id_dat        DATE,
+    cus_civil_no      VARCHAR2(20),
+    cus_opn_dat       DATE,
+    cus_notes         VARCHAR2(1),
+    cus_activity      NUMBER(10),
+    cus_stp_flg       VARCHAR2(1),
+    cus_last_dep      NUMBER(10),
+    cus_lang_flg      VARCHAR2(1),
+    cus_typ           NUMBER(5),
+    cus_dsg           NUMBER(5),
+    cus_stat          VARCHAR2(1),
+    cus_country_code  NUMBER(5),
+    cus_govr_code     NUMBER(5),
+    cus_post_no       NUMBER(10),
+    group_no          NUMBER(10),
+    group_typ         NUMBER(5),
+    cus_card_no       NUMBER(5),
+    cus_sex           VARCHAR2(1),
+    job_cod           NUMBER(5),
+    mobil_no          VARCHAR2(15),
+    e_mail_addr       VARCHAR2(50),
+    internet_addr     VARCHAR2(30),
+    cus_birthday      DATE,
+    cus_upd_date      DATE,
+    cus_kasr_flg      VARCHAR2(1),
+    cus_mjr_key       NUMBER(5),
+    secur_level       NUMBER(10),
+    unified_cus_no    NUMBER(20),
+    cus_birth_add     VARCHAR2(60),
+    cus_religion      NUMBER(5),
+    cus_id_issue      VARCHAR2(20),
+    decision_flg      NUMBER(5),
+    decision_dat      DATE,
+    cus_kind          VARCHAR2(1),
+    fax_no            VARCHAR2(10),
+    telegram_addr     VARCHAR2(25),
+    id_gov            VARCHAR2(10),
+    id_police         VARCHAR2(10),
+    id_issue          VARCHAR2(10),
+    cus_id_typ        VARCHAR2(1),
+    id_gov_cod        NUMBER(5),
+    id_police_cod     NUMBER(5),
+    id_record_cod     NUMBER(5),
+    birth_gov_cod     NUMBER(5),
+    birth_police_cod  NUMBER(5),
+    birth_village_cod NUMBER(5),
+    cus_nam_x         VARCHAR2(60)
+    )
+	;
+	create index SDFFSDF on CUSTOMER_TAB_GOOD_SH (BRANCH_NO, CUS_NO)
+    tablespace ILC_IDX
+    pctfree 10
+    initrans 2
+    maxtrans 255
+    storage
+    (
+        initial 64K
+        next 1M
+        minextents 1
+        maxextents unlimited
+    )
+	;
+	alter table CUSTOMER_TAB_GOOD_SH
+    add constraint CUS_CIVIL_NOOOO unique (CUS_CIVIL_NO)
+    using index 
+    tablespace ILC_IDX
+    pctfree 10
+    initrans 2
+    maxtrans 255
+    storage
+    (
+        initial 64K
+        next 1M
+        minextents 1
+        maxextents unlimited
+    )
+	;
+	create table ABE_BRANCHS_CCH as select * from ABE_BRANCHS_CCH@shmool
+	;
+	create table gov_tab as select * from gov_tab@shmool
+	;
+	create table civil_no_error_fin_sh as select * from civil_no_error_fin_sh@shmool
+	;
+	create table account_error as select * from account_error@shmool
+	;
+	create table ACCOUNTSFILE_DEP
+	(
+	  accountid       VARCHAR2(50),
+	  typeid          VARCHAR2(112),
+	  currencyid      VARCHAR2(333),
+	  branchid        VARCHAR2(212),
+	  isjoint         VARCHAR2(21),
+	  openingdate     VARCHAR2(18),
+	  nationalid      VARCHAR2(333),
+	  secondaryid     VARCHAR2(150),
+	  secondaryidtype VARCHAR2(112),
+	  closingdate     VARCHAR2(18),
+	  statusid        VARCHAR2(11),
+	  statusreason    VARCHAR2(1000)
+	)
+	;
+	alter table ACCOUNTSFILE_DEP
+	  add constraint PK_ACCID_DEP unique (ACCOUNTID)
+	  using index 
+	  tablespace CRT_IDX
+	  pctfree 10
+	  initrans 2
+	  maxtrans 255
+	  storage
+	  (
+		initial 64K
+		next 1M
+		minextents 1
+		maxextents unlimited
+	  )
+	;
+	

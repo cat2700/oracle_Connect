@@ -1,4 +1,4 @@
-usrid || abe_12052022
+usrid || arabank
 pass || icl
 sevice || oracl2k
-ip || 172.29.107.44
+ip || 127.0.0.1

@@ -1,0 +1,46 @@
+
+import catClass
+from datetime import datetime
+# import datetime
+import threading
+import time
+import math
+
+
+start_time = time.time()
+
+
+cn = catClass.mainClass()
+
+conf = cn.readConfig(configFileName="oracleConfig",
+                     tags=['usrid', 'pass', 'sevice', 'ip'])
+cn = catClass.mainClass(
+    uid=f'{conf[0]}', upsw=f'{conf[1]}', service_name=f'{conf[2]}', ip=f'{conf[3]}')
+if cn.open_connect():
+    print('oracle connected')
+else:
+    print('error in connected')
+
+seeList = [["CUSTOMER_TAB_GOOD_SH", 3],
+           ["ABE_BRANCHS_CCH", 1],
+           ["gov_tab@shmool", 1],
+           ["civil_no_error_fin_sh", 1],
+           ["account_error", 1],
+           ["ACCOUNTSFILE_DEP", 2],
+           ]
+sql = list(cn.readTXT(fileName="tst"))
+
+for s in seeList:
+    searchTBL = f"SELECT count(*) FROM all_objects WHERE object_name = '{s[0]}'"
+    result = cn.runSQL(searchTBL)
+    print(int(result[2][0][0]))
+    if int(result[2][0][0]) == 0:  # chick if table exist
+        print(f'Start With {s[0]}')
+        xx = int(s[1])
+        while xx > 0:
+            newSql = sql.pop(0)
+            print(cn.runSQL(newSql))
+            xx = xx - 1
+
+
+print(f"--- {time.time() - start_time} seconds ---")

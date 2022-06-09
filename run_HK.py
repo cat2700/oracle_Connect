@@ -23,7 +23,7 @@ else:
 # ==> pip install cryptography
 
 
-dat = '12/05/2022'
+dat = '31/05/2022'
 wherecond = """
     where a.sub_branch_no in 
     (
@@ -245,6 +245,7 @@ wherecond = """
     915001060,
     915004030,
     908001010
+
 
     )
 

@@ -88,7 +88,6 @@ class mainClass:
                 return True, self.rowsLen, self.rows
         except Exception as err:
             return False, str(err), err.args
-            print(False, str(err), err.args)
         finally:
             self.close_connect()
 
@@ -986,11 +985,11 @@ class mainClass:
             # posting errors data
             print('posting errors data')
             ersql = """insert into customer_tab_error
-                    values (:1,:2,:3,:4,:5) 
+                    values (:1,:2,:3,:4,:5)
                     """
             print(self.insertMany(ersql, error))
             godsql = """insert into customer_tab_good
-                    values (:1,:2,:3) 
+                    values (:1,:2,:3)
                     """
             print(self.insertMany(godsql, good))
 
@@ -1063,8 +1062,8 @@ class mainClass:
                 return
 
             sss = f"""
-                select count(*),sum(tr_amt) 
-                from trans_client_tit_tab 
+                select count(*),sum(tr_amt)
+                from trans_client_tit_tab
                 where cus_no is not null and internal_cus_no  <> 0 and ready_status=1
                 and extract (month from tr_due_date)={Month} and extract (year from tr_due_date) = {Year}
 
@@ -1086,8 +1085,8 @@ class mainClass:
             write_sheet1 = write_book.get_sheet(0)
             # Write 'test' to cell (c, 27)
             write_sheet1.write(20, 1, f'{Month}-{Year}')
-            write_sheet1.write(26, 2, mount)
-            write_sheet1.write(26, 3, count)
+            write_sheet1.write(26, 2, count)
+            write_sheet1.write(26, 3, mount)
 
             # Save the newly written copy. Enter the same as the old path to write over
             # rrr = rn.randint(10000, 99999)
@@ -1101,3 +1100,14 @@ class mainClass:
         except Exception as err:
             print(False, str(err), err.args)
             return False
+
+    def readTXT(self, fileName):
+        try:
+            cd = os.curdir + f"\\{fileName}.txt"
+            rf = open(cd, 'r')
+            all = rf.read().strip().split(";")
+            return all
+        except Exception as err:
+            return False
+        finally:
+            rf.close()
