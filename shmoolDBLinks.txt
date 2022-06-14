@@ -1,0 +1,11 @@
+drop database link SHMOOL
+;
+create database link SHMOOL
+  connect to SHMOOL identified by icl
+  using 'oracl2k'
+;
+drop public database link ISLAMIC
+;
+create public database link ISLAMIC
+  connect to ISLAMIC identified by icl  
+  using "oracl2k"

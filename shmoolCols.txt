@@ -1,0 +1,1 @@
+alter table customer_tab add CUS_NAM_X varchar2(26)

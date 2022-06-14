@@ -1,0 +1,11 @@
+create or replace view customer_tab_xml as
+                        select CUS_CIVIL_NO as nationalId,to_char('') as secondaryId ,to_char('') as secondaryIdType 
+        ,CUS_NAM_L as arabicName,to_char('') as englishName ,to_char(sh.cus_birthday,'yyyymmdd') as birthDate,birth_gov_cod as birthGovCode
+
+        ,CBE_GENDER as gender,id_gov_cod as residenceGovCode,CBE_NATIONAL_ALPHA as nationality 
+        from customer_tab_good_sh sh,cbe_national@SHMOOL, cbe_gender@SHMOOL
+        where 
+        sh.cus_sex = cbe_gender.abe_gendera
+        and sh.cus_nationalt = cbe_national.cbe_national_code
+        and sh.cus_civil_no not in (select s.cus_civil_no  from customer_tab_good_final@shmool s)
+;

@@ -1,0 +1,937 @@
+CREATE OR REPLACE NONEDITIONABLE PROCEDURE civil_no_chk_shmol(
+
+    msg_no OUT      NUMBER )
+
+IS
+
+cursor my_cursor is
+select c.branch_no , c.cus_no , c.cus_nam_l,c.cus_addr_l,c.addr_pos_l,c.cus_typ,c.cus_sex,c.cus_civil_no
+,c.cus_id_dat,c.cus_activity,c.cus_birthday ,to_char(c.cus_tel_no) cus_tel_no
+,to_char(c.mobil_no) mobil_no,c.id_gov_cod,c.birth_gov_cod bgc
+from  (select * from customer_tab union all select * from customer_tab@ISLAMIC) c
+
+where  c.cus_kind = 0 and cus_opn_dat <= to_date('MyDate') and branch_no not in( 905001080,919009000)
+and   (branch_no,cus_no) in (
+
+select branch_no , cus_no from bal_cr_tab b
+where --bal_blnc >0 and
+bal_close_dt is null
+
+union
+
+select branch_no , cus_no from bal_cr_tab@ISLAMIC b
+where --bal_blnc >0 and
+bal_close_dt is null
+
+union
+
+select  branch_no , cus_no from crt_bal c
+where certif_flg in (1,2) and to_dat > 'MyDate'
+
+union
+
+select  branch_no , cus_no from crt_bal@ISLAMIC c
+where certif_flg in (1,2)  and to_dat > 'MyDate'
+
+union
+
+select  branch_no , cus_no from deposit_tab d
+where dp_upd_dsg not in (2,4,6) and dp_dlt_dt is null and dp_val_dt > 'MyDate'
+
+union
+
+select  branch_no , cus_no from deposit_s_tab@ISLAMIC d
+where dp_upd_dsg not in (2,4,6) and dp_dlt_dt is null and dp_val_dt > 'MyDate'
+
+union
+select  branch_no , cus_no from LON_MASTER LS
+where  LOAN_STATUS not in (2,6,9)
+
+union
+select branch_no , cus_no from bal_DB_tab DB
+where  --bal_blnc >0 and
+bal_close_dt is null
+
+union
+select branch_no , cus_no from bal_DB_tab@ISLAMIC DB
+where  --bal_blnc >0 and
+bal_close_dt is null
+)
+--and c.cus_civil_no not in (select cus_civil_no from CUSTOMER_TAB_shmol_rej)
+and c.cus_nationalt = 1
+and substr(c.cus_civil_no,8,2) in (select lpad(g.gov_id,2,0) from gov_tab g)
+and c.id_gov_cod in (select lpad(g.gov_id,2,0) from gov_tab g)
+and substr(c.cus_civil_no,8,2) = to_char(lpad(c.birth_gov_cod,2,0))
+and substr(c.cus_civil_no,2,6) = to_char(c.cus_birthday,'YYMMDD')
+--group by c.branch_no , c.cus_no , c.cus_nam_l,c.cus_addr_l,c.addr_pos_l,c.cus_typ,c.cus_sex,c.cus_civil_no,c.cus_id_dat,c.cus_activity,c.cus_birthday,c.cus_tel_no,c.mobil_no,c.id_gov_cod,c.birth_gov_cod
+--order by 1
+;
+
+
+
+-- cus_age                             decimal;
+dd                                  varchar(2);
+mm                                  varchar(2);
+yy                                  varchar(2);
+yyyy                                 varchar(4);
+full_short_b_dt                      varchar(15);
+ll_birth_dt                          date;
+WS_CUS_BIRTHDAY                       date;
+sx_chek                               varchar(8);
+--sex_chek                               number(8);
+--sex                                  varchar(8);
+--ll_count_cus_exist                   number(1);
+--ll_now_cus_no                        number(10);
+WS_INP_DATE                          date;
+--WS_value_DATE                        date;
+msg_txt                               varchar(70);
+--WS_CUS_TIT_L                          varchar(70);
+karn                                   varchar(1);
+--ll_gov_id                               number(2);
+ll_gov_id                                 varchar(2);
+ll_gov_count                             number(2);
+--ll_civil_no_count                        number(2);
+--civil_cnt_in_curs                         number(4);
+ws_rec                              my_cursor%rowtype  ;
+--tot                                 number(10,3);
+first_round                           int;
+second_round                           decimal (13,3);
+third_round                           number ;
+chk_dig                                number ;
+chk_dig_civ                            number ;
+current_chk_dig                         number ;
+civil_cnt                                      number ;
+-------------
+
+
+
+BEGIN
+
+msg_no := 0;
+--delete from civil_no_error_fin_sh ;
+--delete from customer_tab_good_sh ;
+commit;
+
+
+
+open my_cursor ;
+
+LOOP
+
+FETCH my_cursor INTO ws_rec ;
+EXIT WHEN my_cursor%NOTFOUND;
+
+commit;
+ll_gov_count := 0 ;
+-------------------------------------------------------
+
+if  length(ws_rec.cus_civil_no) <> 14 then
+msg_no  :=  15 ;
+msg_txt := ('??? ?ي?? ?? ???ي? 14 ???');
+insert into civil_no_error_fin_sh
+values (ws_rec.branch_no,ws_rec.cus_no,msg_no,ws_rec.cus_civil_no,ws_rec.cus_nam_l, msg_txt ) ;
+goto END_LOOP ;
+end if ;
+
+
+if  ws_rec.cus_civil_no is null  or  ws_rec.cus_civil_no = '' or  ws_rec.cus_civil_no = '0' then
+msg_no  :=  9 ;
+msg_txt := ('?? ?ي¤? ??? ?ي??') ;
+insert into civil_no_error_fin_sh
+values (ws_rec.branch_no,ws_rec.cus_no,msg_no,ws_rec.cus_civil_no,ws_rec.cus_nam_l, msg_txt ) ;
+goto END_LOOP ;
+end if ;
+--------------------------------------------------------------------
+
+if (length(ws_rec.cus_civil_no) < 14) or (length(ws_rec.cus_civil_no) > 14) then
+msg_no  :=  1 ;
+msg_txt := ('??? ?ي?? ?ل? - ?? ???ي? 14 ???') ;
+insert into civil_no_error_fin_sh
+values (ws_rec.BRANCH_NO,ws_rec.cus_no,msg_no,ws_rec.cus_civil_no,ws_rec.cus_nam_l, msg_txt ) ;
+goto END_LOOP ;
+end if ;
+---------------------------------------------------------------------
+
+select substr(ws_rec.cus_civil_no,2,2) into yy from dual ; --year
+select substr(ws_rec.cus_civil_no,4,2)into mm from dual; --month
+select substr(ws_rec.cus_civil_no,6,2)into dd from dual; -- day
+select substr(ws_rec.cus_civil_no,13,1) into sx_chek from dual; -- sex
+select SUBSTR(ws_rec.CUS_CIVIL_NO, 1, 1) into karn from dual; -- century
+-- select TO_NUMBER(SUBSTR(ws_rec.CUS_CIVIL_NO, 8, 2)) into ll_gov_id from dual; -- govern
+select SUBSTR(ws_rec.CUS_CIVIL_NO, 8, 2) into ll_gov_id from dual; -- govern
+
+
+if karn <> '2' and karn <> '3' then
+msg_no  :=  2;
+msg_txt := ('?ل?  ??? ????? ه? ????? ???ي?? - ?ي? ??? ????، ??????') ;
+insert into civil_no_error_fin_sh
+values (ws_rec.BRANCH_NO,ws_rec.cus_no,msg_no,ws_rec.cus_civil_no,ws_rec.cus_nam_l, msg_txt ) ;
+goto END_LOOP ;
+end if ;
+
+-------------------------------------??ي?? ????? ???????
+
+IF karn = '2' THEN
+yyyy := ('19'||yy) ;
+full_short_b_dt := dd||'-'||mm||'-'||yyyy ;
+----------------------------------------------------------
+begin
+SELECT TO_DATE(full_short_b_dt, 'DD/MM/YYYY')
+INTO WS_CUS_BIRTHDAY
+FROM DUAL;
+EXCEPTION
+WHEN OTHERS THEN
+msg_no  :=  2;
+msg_txt := ('?ل?  ????? ???ي?? - ?ى? ?ي ?ي? ??????? ') ;
+insert into civil_no_error_fin_sh
+values (ws_rec.BRANCH_NO,ws_rec.cus_no,msg_no,ws_rec.cus_civil_no,ws_rec.cus_nam_l, msg_txt ) ;
+goto END_LOOP ;
+end ;
+----------------------------------------------------------
+ll_birth_dt := to_date(full_short_b_dt,'dd/mm/yyyy') ;
+------------?????? ?? ??، ??????? 19
+if to_char(ll_birth_dt ,'yyyy') < 1920 or to_char(ll_birth_dt ,'yyyy') > 1999 then
+msg_no  :=  3;
+msg_txt := ('?ل?  ????? ???ي?? - ??، ???????') ;
+insert into civil_no_error_fin_sh
+values (ws_rec.BRANCH_NO,ws_rec.cus_no,msg_no,ws_rec.cus_civil_no,ws_rec.cus_nam_l, msg_txt ) ;
+goto END_LOOP ;
+end if ;
+
+else if karn = '3' then
+yyyy := '20'||yy ;
+full_short_b_dt := dd||'-'||mm||'-'||yyyy ;
+-----------------------------------------------
+begin
+SELECT TO_DATE(full_short_b_dt, 'DD/MM/YYYY')
+INTO WS_CUS_BIRTHDAY
+FROM DUAL;
+EXCEPTION
+WHEN OTHERS THEN
+msg_no  :=  2;
+msg_txt := ('??ي?? ????? ???????  ????? ???ي?? ?ل? ') ;
+insert into civil_no_error_fin_sh
+values (ws_rec.BRANCH_NO,ws_rec.cus_no,msg_no,ws_rec.cus_civil_no,ws_rec.cus_nam_l, msg_txt ) ;
+goto END_LOOP ;
+end ;
+---------------------------------------------
+ll_birth_dt := to_date(full_short_b_dt,'dd/mm/yyyy');
+----- ??????? ?? ??، ??????? 20
+IF TO_CHAR(ll_birth_dt, 'YYYY') < 2000 OR TO_CHAR(ll_birth_dt, 'YYYY') > TO_CHAR(WS_INP_DATE, 'YYYY') THEN
+msg_no  :=  4;
+msg_txt := ('?ل?  ????? ???ي?? - ??، ???????') ;
+insert into civil_no_error_fin_sh
+values (ws_rec.BRANCH_NO,ws_rec.cus_no,msg_no,ws_rec.cus_civil_no,ws_rec.cus_nam_l, msg_txt ) ;
+goto END_LOOP ;
+end if ;
+end if;
+end if;
+------------------------?????? ?? ?ى? ???????
+IF TO_CHAR(ll_birth_dt, 'mm') > 12 OR TO_CHAR(ll_birth_dt, 'mm') < 1 THEN
+msg_no  :=  5;
+msg_txt := ('?ل?  ????? ???ي?? - ?ى? ??????? ') ;
+insert into civil_no_error_fin_sh
+values (ws_rec.BRANCH_NO,ws_rec.cus_no,msg_no,ws_rec.cus_civil_no,ws_rec.cus_nam_l, msg_txt ) ;
+goto END_LOOP ;
+end if ;
+
+-------------?????? ?? ??? ?????ه?،
+begin
+SELECT nvl(COUNT(*),0)
+INTO ll_gov_count
+FROM GOV_TAB A
+WHERE A.GOV_ID = ll_gov_id;
+
+EXCEPTION
+
+WHEN OTHERS THEN
+msg_no  := 6;
+msg_txt := ('??? ?????ه?، ?????? ي?????م ن?? ????  ي???ي? ???، ???،') ;
+insert into civil_no_error_fin_sh
+values (ws_rec.BRANCH_NO,ws_rec.cus_no,msg_no,ws_rec.cus_civil_no,ws_rec.cus_nam_l, msg_txt ) ;
+goto END_LOOP ;
+end ;
+
+
+IF ll_gov_id <> ws_rec.bgc THEN
+msg_no  :=  6;
+msg_txt := ('?ل?  ????? ???ي?? - ?????ه?، ????? ?????? ي?????م ?? ??????') ;
+insert into civil_no_error_fin_sh
+values (ws_rec.BRANCH_NO,ws_rec.cus_no,msg_no,ws_rec.cus_civil_no,ws_rec.cus_nam_l, msg_txt ) ;
+goto END_LOOP ;
+END IF;
+
+SELECT nvl(COUNT(*),0)
+INTO ll_gov_count
+FROM GOV_TAB A
+WHERE A.GOV_ID = ws_rec.id_gov_cod;
+
+IF ll_gov_count = 0 THEN
+msg_no  :=  28;
+msg_txt := ('???ه?، ?­??? ?? ل??، ن?? ­???') ;
+insert into civil_no_error_fin_sh
+values (ws_rec.BRANCH_NO,ws_rec.cus_no,msg_no,ws_rec.cus_civil_no,ws_rec.cus_nam_l, msg_txt ) ;
+goto END_LOOP ;
+END IF;
+
+
+----------------?يم ??م???
+----age 80 --------
+
+/*if  months_between ('30/03/2020' , ll_birth_dt   ) > 960 then
+msg_no  :=  11;
+msg_txt := (' م??? ?? ? ?? ?? 80');
+insert into civil_no_error_fin_sh
+values (ws_rec.BRANCH_NO,ws_rec.cus_no,11,ws_rec.cus_civil_no,ws_rec.cus_nam_l, msg_txt ) ;
+goto END_LOOP ;
+END IF;
+
+----age 18 --------
+if  months_between ('30/03/2020' , ll_birth_dt  ) < 216 then
+msg_no  :=  12;
+msg_txt := ('م??? ??? ?? 18 م??');
+insert into civil_no_error_fin_sh
+values (ws_rec.BRANCH_NO,ws_rec.cus_no,12,ws_rec.cus_civil_no,ws_rec.cus_nam_l, msg_txt ) ;
+goto END_LOOP ;
+END IF;*/
+---------chk digit--
+begin
+first_round := substr(ws_rec.cus_civil_no,1,1) * 2 +
+substr(ws_rec.cus_civil_no,2,1) * 7    +
+substr(ws_rec.cus_civil_no,3,1) * 6    +
+substr(ws_rec.cus_civil_no,4,1) * 5    +
+substr(ws_rec.cus_civil_no,5,1) * 4    +
+substr(ws_rec.cus_civil_no,6,1) * 3    +
+substr(ws_rec.cus_civil_no,7,1) * 2    +
+substr(ws_rec.cus_civil_no,8,1) * 7    +
+substr(ws_rec.cus_civil_no,9,1) * 6    +
+substr(ws_rec.cus_civil_no,10,1) * 5   +
+substr(ws_rec.cus_civil_no,11,1) * 4   +
+substr(ws_rec.cus_civil_no,12,1) * 3   +
+substr(ws_rec.cus_civil_no,13,1) * 2 ;
+
+EXCEPTION
+
+WHEN OTHERS THEN
+msg_no  := 14;
+msg_txt := ('??? ?ي?? ???ي? م?? ??يه ??­،') ;
+insert into civil_no_error_fin_sh
+values (ws_rec.BRANCH_NO,ws_rec.cus_no,msg_no,ws_rec.cus_civil_no,ws_rec.cus_nam_l, msg_txt ) ;
+goto END_LOOP ;
+end ;
+
+begin
+SELECT to_number(substr(ws_rec.cus_civil_no,14,1)  )
+INTO current_chk_dig
+FROM DUAL;
+EXCEPTION
+WHEN OTHERS THEN
+msg_no  := 14;
+msg_txt := ('??? ?ي?? ???ي? م?? ??يه ??­،') ;
+insert into civil_no_error_fin_sh
+values (ws_rec.BRANCH_NO,ws_rec.cus_no,msg_no,ws_rec.cus_civil_no,ws_rec.cus_nam_l, msg_txt ) ;
+goto END_LOOP ;
+end ;
+
+
+chk_dig_civ := to_number(substr(ws_rec.cus_civil_no,14,1)  );
+
+second_round := trunc(first_round/11,0) ;
+third_round := second_round  * 11 - first_round ;
+
+if third_round = 0   THEN
+chk_dig := 1 ;
+else
+chk_dig  := 11 + third_round ;
+end if ;
+if chk_dig <> chk_dig_civ then
+msg_no  :=  14;
+msg_txt := ('??? ?ي?? ن?? ­??? ? ') ;
+insert into civil_no_error_fin_sh
+values (ws_rec.BRANCH_NO,ws_rec.cus_no,msg_no,ws_rec.cus_civil_no,ws_rec.cus_nam_l, msg_txt ) ;
+goto END_LOOP ;
+END IF;
+
+--------------------End Of Cus_civil_chk----------------
+if ws_rec.cus_birthday is null then
+
+msg_no  :=  30;
+msg_txt := ('?? ?ي¤? ????? ????? ??¤?') ;
+insert into civil_no_error_fin_sh
+values (ws_rec.BRANCH_NO,ws_rec.cus_no,msg_no,ws_rec.cus_civil_no,ws_rec.cus_nam_l, msg_txt ) ;
+goto END_LOOP ;
+END IF;
+
+
+if ws_rec.cus_birthday <> ll_birth_dt then
+
+msg_no  :=  16;
+msg_txt := (' ????? ????? ??م??? ?? ??ه? ?م ????? ?????  ????? ???ي??') ;
+insert into civil_no_error_fin_sh
+values (ws_rec.BRANCH_NO,ws_rec.cus_no,msg_no,ws_rec.cus_civil_no,ws_rec.cus_nam_l, msg_txt ) ;
+goto END_LOOP ;
+END IF;
+------------------------------------------------------
+if ws_rec.cus_sex is null and ws_rec.cus_sex <> 1 and ws_rec.cus_sex <> 2 then
+msg_no  :=  17;
+msg_txt := (' ?ل? ه? ¤?? ??م??? ?ي? ن?? ?م?ه ') ;
+insert into civil_no_error_fin_sh
+values (ws_rec.BRANCH_NO,ws_rec.cus_no,msg_no,ws_rec.cus_civil_no,ws_rec.cus_nam_l, msg_txt ) ;
+goto END_LOOP ;
+END IF;
+
+
+if mod(sx_chek ,2) = 0 then
+if ws_rec.cus_sex <> 2 then
+msg_no  :=  17;
+msg_txt := (' ?يم ¤?? ??م??? ?? ??ه? ?م ?يم ??¤??  ????? ???ي??') ;
+insert into civil_no_error_fin_sh
+values (ws_rec.BRANCH_NO,ws_rec.cus_no,msg_no,ws_rec.cus_civil_no,ws_rec.cus_nam_l, msg_txt ) ;
+goto END_LOOP ;
+END IF;
+else
+if  ws_rec.cus_sex <> 1 then
+msg_no  :=  17;
+msg_txt := (' ?يم ¤?? ??م??? ?? ??ه? ?م ?يم ??¤??  ????? ???ي??') ;
+insert into civil_no_error_fin_sh
+values (ws_rec.BRANCH_NO,ws_rec.cus_no,msg_no,ws_rec.cus_civil_no,ws_rec.cus_nam_l, msg_txt ) ;
+goto END_LOOP ;
+END IF;
+end if;
+--------------------------------
+/*if ( ws_rec.mobil_no is null) and length( ws_rec.mobil_no) < 11 and ( ws_rec.mobil_no = '0') then
+msg_no  :=  18;
+msg_txt := (' ?ل?  ????? ?????ي? ??? ?? 11 ?ي ن?? ­???') ;
+insert into civil_no_error_fin_sh
+values (ws_rec.BRANCH_NO,ws_rec.cus_no,msg_no,ws_rec.cus_civil_no,ws_rec.cus_nam_l, msg_txt ) ;
+goto END_LOOP ;
+END IF;*/
+
+/*if  ws_rec.cus_addr_l is null and ws_rec.cus_addr_l = 0 and length(ws_rec.cus_addr_l) < 7 then
+msg_no  :=  19;
+msg_txt := ('?ل?  م?ي?? ??م???') ;
+insert into civil_no_error_fin_sh
+values (ws_rec.BRANCH_NO,ws_rec.cus_no,msg_no,ws_rec.cus_civil_no,ws_rec.cus_nam_l, msg_txt ) ;
+goto END_LOOP ;
+END IF;*/
+
+/*if  (ws_rec.addr_pos_l is null) and (ws_rec.addr_pos_l = 0) and (length(ws_rec.addr_pos_l) < 7) then
+msg_no  :=  20;
+msg_txt := ('?ل?  م?ي?? ??????? ??م???') ;
+insert into civil_no_error_fin_sh
+values (ws_rec.BRANCH_NO,ws_rec.cus_no,msg_no,ws_rec.cus_civil_no,ws_rec.cus_nam_l, msg_txt ) ;
+goto END_LOOP ;
+END IF;*/
+select count(*)
+into civil_cnt
+from customer_tab_good_sh
+where customer_tab_good_sh.cus_civil_no = ws_rec.cus_civil_no ;
+if civil_cnt > 0 then
+msg_no  :=  26;
+msg_txt := ('??? ?ي?? ????') ;
+insert into civil_no_error_fin_sh
+values (ws_rec.BRANCH_NO,ws_rec.cus_no,msg_no,ws_rec.cus_civil_no,ws_rec.cus_nam_l, msg_txt ) ;
+goto END_LOOP ;
+END IF;
+
+insert into customer_tab_good_sh (select * from (select * from customer_tab union all select * from customer_tab@ISLAMIC) y where y.branch_no = ws_rec.BRANCH_NO and y.cus_no = ws_rec.cus_no );
+commit;
+msg_no  :=  0;
+
+<<end_loop>>
+NULL ;
+
+END LOOP ;
+
+close my_cursor ;
+-------------------------    END    ----------------------------
+commit;
+<<end_prog>>
+null ;
+
+END;
+
+||(())||
+
+CREATE OR REPLACE PROCEDURE CBEAccData_cr_all  (msg_no    OUT  NUMBER )
+
+IS
+
+cursor my_current_bal_cr_tab is select
+       b.branch_no||b.bal_acc_no||b.bal_curr||'0'||b.bal_sub_acc||'00'||(b.cus_no) as accountid ,b.cus_no,b.bal_acc_no,b.bal_curr,b.branch_no,0,
+      to_char(b.bal_open_dt,'yyyyMMdd') as openingdate,c.cus_civil_no,to_char(b.bal_close_dt,'yyyyMMdd')as closingdate,b.bal_open_dt,b.bal_close_dt
+from  (select * from bal_cr_tab union all select * from bal_cr_tab@ISLAMIC) b
+,  customer_tab_good_sh c
+       where ( b.branch_no     = c.branch_no   )
+       and  ( b.cus_no = c.cus_no    )
+       and b.bal_open_dt is not null
+       and b.branch_no not in( 905001080,919009000)
+       and b.bal_open_dt <= 'MyDate'
+       --and b.branch_no is not null
+       and ((b.bal_close_dt between 'SDate' and  'MyDate') or  b.bal_close_dt is null ) -- check this condition
+       and b.bal_acc_no >= '500' -- check this condition
+       and( b.bal_close_dt >=b.bal_open_dt or b.bal_close_dt is null ) -- check this condition
+       and b.bal_curr = 1
+--      and c.cus_civil_no not in (select cus_civil_no from CUSTOMER_TAB_shmol_rej)
+      and( (b.branch_no||b.bal_acc_no||b.bal_curr||'0'||b.bal_sub_acc||'00'||(b.cus_no) in (select accountid from ACCOUNTSFILE_CR_final@shmool f) and (b.bal_close_dt between 'SDate' and  'MyDate'))
+      or b.bal_open_dt between 'SDate' and  'MyDate' )  ; --new and updated accouts for all good cif
+
+
+
+      ---- order by b.branch_no , b.cus_no, b.bal_acc_no , b.bal_curr , b.bal_sub_acc
+
+
+  ws_rec        my_current_bal_cr_tab%ROWTYPE;
+
+c_branch  number(4) ;
+xxx  varchar2(999) ;
+c_curr varchar2(3) ;
+c_statusId number(1) ;
+ Statusreason  varchar2(1000) ;
+  abnormal_condition exception;
+  acc_type varchar(1);
+
+BEGIN
+  --delete from ACCOUNTSFILE_CR;
+  --commit;
+   msg_no := 0;
+
+open my_current_bal_cr_tab;
+   loop
+     fetch my_current_bal_cr_tab  into ws_rec;
+     exit when my_current_bal_cr_tab%notfound;
+
+select max(nvl(ABE_BRANCHS_CCH.BRANCH_CCH,0))  into c_branch from abe_branchs_cch
+   where ABE_BRANCHS_CCH.branch_no =  ws_rec.branch_no ;
+
+/*select max(currency.cbe_nam_f) into c_curr from currency
+  where currency.currency_id = ws_rec.bal_curr;*/
+
+  c_curr := 'EGP';
+
+if c_branch is null   THEN
+     --c_branch := '0'
+     continue;
+
+
+
+end if ;   ------- USELESS CONDITION
+
+if c_curr is null   THEN
+     c_curr := 'NOT';
+end if ;
+
+   if ws_rec.closingdate is null then
+    c_statusId := 1 ;
+   Statusreason := '' ;
+   if ws_rec.bal_acc_no = 704 then
+      Statusreason := 'Dormant' ;
+      end if;
+  else
+   c_statusId := 0 ;
+     Statusreason := 'Closed Based Customer Request' ;
+   end if ;
+
+
+
+if ws_rec.bal_acc_no < 700 then
+  acc_type := 1;
+  end if ;
+
+  if ws_rec.bal_acc_no >= 700 then
+  acc_type := 2;
+  end if ;
+
+   /*if ws_rec.bal_close_dt is not null then
+       if ws_rec.bal_close_dt < ws_rec.bal_open_dt  then
+    msg_no := 1;
+      goto end_loop ;
+      end if;
+          \* if ws_rec.bal_close_dt > 'MyDate' then
+      msg_no := 1;
+      goto end_loop ;
+      end if;*\
+    end if;*/
+
+INSERT INTO ACCOUNTSFILE_CR
+ (
+   ACCOUNTSFILE_CR.Accountid ,
+   ACCOUNTSFILE_CR.Typeid ,
+   ACCOUNTSFILE_CR.Currencyid,
+   ACCOUNTSFILE_CR.Branchid ,
+   ACCOUNTSFILE_CR.Isjoint,
+   ACCOUNTSFILE_CR.Openingdate,
+   ACCOUNTSFILE_CR.Nationalid,
+   ACCOUNTSFILE_CR.Secondaryid,
+   ACCOUNTSFILE_CR.Secondaryidtype ,
+   ACCOUNTSFILE_CR.Closingdate,
+   ACCOUNTSFILE_CR.Statusid,
+   ACCOUNTSFILE_CR.Statusreason)
+values
+  (ws_rec.accountid,acc_type,c_curr,c_branch,0,ws_rec.openingdate,ws_rec.cus_civil_no,null,null,ws_rec.closingdate,c_statusId,Statusreason);
+
+  commit;
+ --end if;
+ <<end_loop>>
+  NULL ;
+  end loop;
+ --- CbeAccData (msg_no);
+  if  msg_no = 1 then
+            raise abnormal_condition;
+         end if;
+  exception when others then
+      rollback;
+      msg_no := 1;
+      xxx := substr(sqlerrm,1,200)  ;
+END;
+
+
+||(())||
+
+CREATE OR REPLACE PROCEDURE CBEAccData_crt_ALL (msg_no    OUT  NUMBER )
+
+IS
+
+cursor my_current_bal_db_tab is select
+
+      b.BRANCH_NO||b.CERTIF_CODE|| b.CERTIF_NO|| b.CERTIF_VAL accountid,b.cus_no,b.bal_acc_no,b.s_curr bal_curr,b.branch_no,0,to_char(b.p_ren_dat,'yyyyMMdd') openingdate,
+      c.cus_civil_no,to_char(b.flg_dat,'yyyyMMdd') closingdate,b.certif_flg,b.p_ren_dat,b.flg_dat
+
+   from (select * from crt_bal union all select * from crt_bal@ISLAMIC )  b
+   ,  customer_tab_good_sh c
+       where ( b.branch_no     = c.branch_no   )
+       and  ( b.cus_no = c.cus_no)
+       and  ( b.certif_flg < 4)  -- should be and  (b.certif_flg in (1,2)    as 3 ostradt and 4 sorfat
+        AND B.TO_DAT > 'MyDate'
+       and (b.branch_no not in( 905001080,919009000) )
+       and b.s_curr = 1
+              --and c.cus_civil_no not in (select cus_civil_no from CUSTOMER_TAB_shmol_rej)
+       and b.BRANCH_NO||b.CERTIF_CODE|| b.CERTIF_NO|| b.CERTIF_VAL not in (select accountid from accountsfile_crt_final@shmool)
+
+       order by b.branch_no , b.cus_no ;
+  ws_rec        my_current_bal_db_tab%ROWTYPE;
+
+c_branch  number(4) ;
+c_curr varchar2(3) ;
+c_statusId number(1) ;
+close_date varchar(10) ;
+Statusreason varchar2(1000) ;
+xxx  varchar(999) ;
+  abnormal_condition exception;
+BEGIN
+   msg_no := 0;
+
+open my_current_bal_db_tab;
+   loop
+     fetch my_current_bal_db_tab  into ws_rec;
+     exit when my_current_bal_db_tab%notfound;
+
+select max(nvl(ABE_BRANCHS_CCH.BRANCH_CCH,0))  into c_branch from ABE_BRANCHS_CCH
+   where ABE_BRANCHS_CCH.branch_no =  ws_rec.branch_no ;
+
+/*select max(currency.cbe_nam_f) into c_curr from currency
+  where currency.currency_id = ws_rec.bal_curr;*/
+  c_curr := 'EGP';
+
+if c_branch is null   THEN
+     --c_branch := '0'
+     continue;
+end if ;
+if c_curr is null   THEN
+     c_curr := 'NOT';
+end if ;
+if ws_rec.certif_flg < 3  then
+  c_statusId := 1 ;
+  Statusreason := '' ;
+  else
+   c_statusId := 0 ;
+   Statusreason := 'Closed Based Customer Request' ;
+   end if ;
+
+
+ if ws_rec.certif_flg = 3  then
+  close_date := ws_rec.closingdate ;
+  else
+ close_date := null;
+ end if ;
+
+
+INSERT INTO AccountsFile_CRT
+ (
+   AccountsFile_CRT.Accountid ,
+   AccountsFile_CRT.Typeid ,
+   AccountsFile_CRT.Currencyid,
+   AccountsFile_CRT.Branchid ,
+   AccountsFile_CRT.Isjoint,
+   AccountsFile_CRT.Openingdate,
+   AccountsFile_CRT.Nationalid,
+   AccountsFile_CRT.Secondaryid,
+   AccountsFile_CRT.Secondaryidtype ,
+   AccountsFile_CRT.Closingdate,
+   AccountsFile_CRT.Statusid,
+   AccountsFile_CRT.Statusreason)
+values
+  (ws_rec.accountid,5,c_curr,c_branch,0,ws_rec.openingdate,ws_rec.cus_civil_no,null,null,close_date,c_statusId,Statusreason);
+commit;
+
+ --end if;
+  end loop;
+  exception when others then
+      rollback;
+       xxx := substr(sqlerrm,1,200)  ;
+      msg_no := 1;
+END;
+
+||(())||
+
+CREATE OR REPLACE PROCEDURE CBEAccData_DB_ALL (msg_no    OUT  NUMBER )
+
+IS
+
+cursor my_current_bal_db_tab is select
+      b.branch_no||b.bal_acc_no||b.bal_curr||'0'||b.bal_sub_acc||'00'||(b.cus_no) accountid ,b.cus_no,b.bal_acc_no,b.bal_curr,b.branch_no,0,to_char(b.bal_open_dt,'yyyyMMdd') openingdate,
+      c.cus_civil_no,null bbb,null aaa,to_char(b.bal_close_dt,'yyyyMMdd') closingdate,b.bal_open_dt ,b.bal_close_dt
+
+   from (select * from bal_db_tab union all select * from bal_db_tab@ISLAMIC) b
+   ,  customer_tab_good_sh c
+       where  b.branch_no     = c.branch_no
+       and   b.cus_no = c.cus_no
+       and b.branch_no not in( 905001080,919009000)
+       and b.bal_open_dt is not null
+       and b.bal_open_dt <= 'MyDate'
+       and ((b.bal_close_dt between 'SDate' and  'MyDate') or  b.bal_close_dt is null ) -- check this condition
+       and b.bal_acc_no < '500' -- check this condition
+       and( b.bal_close_dt >=b.bal_open_dt or b.bal_close_dt is null ) -- check this condition
+       and b.bal_curr = 1
+ --      and c.cus_civil_no not in (select cus_civil_no from CUSTOMER_TAB_shmol_rej)
+         --and bal_sod_blnc <> 0
+       --and  ( b.bal_close_dt   is null)
+         and( (b.branch_no||b.bal_acc_no||b.bal_curr||'0'||b.bal_sub_acc||'00'||(b.cus_no) in (select accountid from ACCOUNTSFILE_db_final@shmool f) and (b.bal_close_dt between 'SDate' and  'MyDate'))
+      or b.bal_open_dt between 'SDate' and  'MyDate' )
+       order by b.branch_no , b.cus_no, b.bal_acc_no , b.bal_curr , b.bal_sub_acc;
+
+  ws_rec        my_current_bal_db_tab%ROWTYPE;
+
+c_branch  number(4) ;
+c_curr varchar2(3) ;
+c_statusId number(1) ;
+  abnormal_condition exception;
+  Statusreason  varchar2(1000) ;
+BEGIN
+  delete from AccountsFile_db;
+  commit;
+   msg_no := 0;
+
+open my_current_bal_db_tab;
+   loop
+     fetch my_current_bal_db_tab  into ws_rec;
+     exit when my_current_bal_db_tab%notfound;
+
+select max(nvl(ABE_BRANCHS_CCH.BRANCH_CCH,0))  into c_branch from ABE_BRANCHS_CCH
+   where ABE_BRANCHS_CCH.branch_no =  ws_rec.branch_no ;
+
+/*select max(currency.cbe_nam_f) into c_curr from currency
+  where currency.currency_id = ws_rec.bal_curr;*/
+  c_curr := 'EGP';
+
+if c_branch is null   THEN
+     --c_branch := '0'
+     continue;
+end if ;
+if c_curr is null   THEN
+     c_curr := 'NOT';
+end if ;
+if ws_rec.closingdate is null then
+  c_statusId := 1 ;
+   Statusreason := '' ;
+  else
+   c_statusId := 0 ;
+    Statusreason := 'Closed Based Customer Request' ;
+   end if ;
+
+/*   if ws_rec.bal_close_dt is not null then
+   if ws_rec.bal_close_dt < ws_rec.bal_open_dt  then
+    msg_no := 1;
+      goto end_loop ;
+      end if;
+     if ws_rec.bal_close_dt > 'MyDate' then
+      msg_no := 1;
+      goto end_loop ;
+      end if;
+end if;*/
+INSERT INTO AccountsFile_db
+ (
+   AccountsFile_db.Accountid ,
+   AccountsFile_db.Typeid ,
+   AccountsFile_db.Currencyid,
+   AccountsFile_db.Branchid ,
+   AccountsFile_db.Isjoint,
+   AccountsFile_db.Openingdate,
+   AccountsFile_db.Nationalid,
+   AccountsFile_db.Secondaryid,
+   AccountsFile_db.Secondaryidtype ,
+   AccountsFile_db.Closingdate,
+   AccountsFile_db.Statusid,
+   AccountsFile_db.Statusreason)
+values
+  (ws_rec.accountid,7,c_curr,c_branch,0,ws_rec.openingdate,ws_rec.cus_civil_no,null,null,ws_rec.closingdate,c_statusId,Statusreason);
+commit;
+  --CbeAccData_dep (msg_no);
+
+ --end if;
+ <<end_loop>>
+  NULL ;
+  end loop;
+  if  msg_no = 1 then
+raise abnormal_condition;
+         end if;
+  exception when others then
+      rollback;
+      msg_no := 1;
+END;
+
+
+||(())||
+
+CREATE OR REPLACE PROCEDURE CBEAccData_dep_ALL (msg_no    OUT  NUMBER )
+
+IS
+
+cursor my_current_bal_db_tab is select
+
+      b.Accountid,b.cus_no,b.dp_dep_acc,b.dp_curr bal_curr,b.branch_no,to_char(b.dp_open_dt,'yyyyMMdd') Openingdate,
+      c.cus_civil_no,to_char(b.dp_dlt_dt,'yyyyMMdd')Closingdate,b.dp_upd_dsg,b.dp_dlt_dt,b.dp_open_dt
+
+   from (select
+   y.BRANCH_NO|| y.CUS_NO|| y.DP_DEP_ACC|| y.DP_CURR|| y.DP_DEP_NO Accountid,y.cus_no,y.dp_dep_acc,y.dp_curr bal_curr,y.branch_no
+   ,to_char(y.dp_open_dt,'yyyyMMdd') Openingdate,y.DP_CURR,y.DP_VAL_DT,
+      to_char(y.dp_dlt_dt,'yyyyMMdd')Closingdate,y.dp_upd_dsg,y.dp_dlt_dt,y.dp_open_dt from deposit_tab y
+      union all
+       select
+         x.BRANCH_NO|| x.CUS_NO|| x.DP_DEP_ACC|| x.DP_CURR|| x.DP_DEP_NO Accountid,x.cus_no,x.dp_dep_acc,x.dp_curr bal_curr,x.branch_no
+   ,to_char(x.dp_open_dt,'yyyyMMdd') Openingdate,x.DP_CURR,x.DP_VAL_DT,
+      to_char(x.dp_dlt_dt,'yyyyMMdd')Closingdate,x.dp_upd_dsg,x.dp_dlt_dt,x.dp_open_dt
+        from deposit_s_tab@ISLAMIC x) b,
+   customer_tab_good_sh c
+       where ( b.branch_no     = c.branch_no   )
+       and  ( b.cus_no = c.cus_no)
+       AND B.DP_VAL_DT > 'MyDate'
+       and (b.branch_no not in( 905001080,919009000) )
+       and b.dp_curr = 1
+       and (dp_dlt_dt <= 'MyDate' or dp_dlt_dt is null )
+       and (dp_open_dt<= dp_dlt_dt or dp_dlt_dt is null)
+       and dp_open_dt <= 'MyDate'
+       --and c.cus_civil_no not in (select cus_civil_no from CUSTOMER_TAB_shmol_rej)
+       and dp_open_dt is not null -- new
+       and ((b.accountid in (select accountid from ACCOUNTSFILE_dep_final@shmool f) and (dp_dlt_dt between 'SDate' and 'MyDate'))
+       or dp_open_dt between 'SDate' and 'MyDate')
+
+
+       order by b.branch_no , b.cus_no;
+
+  ws_rec        my_current_bal_db_tab%ROWTYPE;
+
+c_branch  number(4) ;
+c_curr varchar2(3) ;
+c_statusId number(1) ;
+Statusreason  varchar2(1000) ;
+close_date varchar2(10) ;
+  abnormal_condition exception;
+BEGIN
+   msg_no := 0;
+
+open my_current_bal_db_tab;
+   loop
+     fetch my_current_bal_db_tab  into ws_rec;
+     exit when my_current_bal_db_tab%notfound;
+
+select max(nvl(ABE_BRANCHS_CCH.BRANCH_CCH,0))  into c_branch from ABE_BRANCHS_CCH
+   where ABE_BRANCHS_CCH.branch_no =  ws_rec.branch_no ;
+
+/*select max(currency.cbe_nam_f) into c_curr from currency
+  where currency.currency_id = ws_rec.bal_curr;
+*/
+
+C_CURR := 'EGP';
+if c_branch is null   THEN
+     --c_branch := '0'
+     continue;
+end if ;
+if c_curr is null   THEN
+     c_curr := 'NOT';
+end if ;
+
+
+if ws_rec.dp_upd_dsg not in (2,4,6)  then
+  c_statusId := 1 ;
+   Statusreason := '' ;
+  else
+   c_statusId := 0 ;
+    Statusreason := 'Closed Based Customer Request' ;
+   end if ;
+
+    if ws_rec.dp_upd_dsg in (2,4,6) and ws_rec.dp_dlt_dt is null then
+      msg_no := 1;
+      insert into account_error values (ws_rec.accountid,1,ws_rec.cus_civil_no,'CBEACCDATA_DEP');
+      goto end_loop ;
+      end if;
+
+if ws_rec.dp_upd_dsg in (2,4,6)  then
+  close_date := ws_rec.closingdate ;
+  else
+ close_date := null;
+ end if ;
+
+/* if ws_rec.dp_upd_dsg in (2,4,6)  then
+  if ws_rec.dp_dlt_dt < ws_rec.dp_open_dt then
+ msg_no := 1;
+ insert into account_error values (ws_rec.accountid,2,ws_rec.cus_civil_no,'CBEACCDATA_DEP');
+      goto end_loop ;
+      end if;
+     if ws_rec.dp_dlt_dt > 'MyDate'   then
+      msg_no := 1;
+      insert into account_error values (ws_rec.accountid,3,ws_rec.cus_civil_no,'CBEACCDATA_DEP');
+      goto end_loop ;
+ end if ;
+  end if ;
+
+  if ws_rec.dp_open_dt is null then
+     msg_no := 1;
+     insert into account_error values (ws_rec.accountid,4,ws_rec.cus_civil_no,'CBEACCDATA_DEP');
+     goto end_loop;
+  end if;*/
+
+
+INSERT INTO AccountsFile_DEP
+ (
+   AccountsFile_DEP.Accountid ,
+   AccountsFile_DEP.Typeid ,
+   AccountsFile_DEP.Currencyid,
+   AccountsFile_DEP.Branchid ,
+   AccountsFile_DEP.Isjoint,
+   AccountsFile_DEP.Openingdate,
+   AccountsFile_DEP.Nationalid,
+   AccountsFile_DEP.Secondaryid,
+   AccountsFile_DEP.Secondaryidtype ,
+   AccountsFile_DEP.Closingdate,
+   AccountsFile_DEP.Statusid,
+   AccountsFile_DEP.Statusreason)
+values
+  (ws_rec.accountid,3,c_curr,c_branch,0,ws_rec.openingdate,ws_rec.cus_civil_no,null,null,close_date,c_statusId,Statusreason);
+commit;
+  --- CbeAccData_crt (msg_no);
+
+ --end if;
+  <<end_loop>>
+  NULL ;
+  end loop;
+   if  msg_no = 1 then
+             raise abnormal_condition;
+         end if;
+  exception when others then
+      rollback;
+      msg_no := 1;
+END;
+
+
+||(())||

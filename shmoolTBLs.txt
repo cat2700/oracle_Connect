@@ -129,4 +129,95 @@
 		maxextents unlimited
 	  )
 	;
-	
+	create table ACCOUNTSFILE_DB
+(
+  accountid       VARCHAR2(50),
+  typeid          VARCHAR2(112),
+  currencyid      VARCHAR2(333),
+  branchid        VARCHAR2(212),
+  isjoint         VARCHAR2(21),
+  openingdate     VARCHAR2(18),
+  nationalid      VARCHAR2(333),
+  secondaryid     VARCHAR2(150),
+  secondaryidtype VARCHAR2(112),
+  closingdate     VARCHAR2(18),
+  statusid        VARCHAR2(11),
+  statusreason    VARCHAR2(1000)
+)
+;
+alter table ACCOUNTSFILE_DB
+  add constraint PK_ACCID_DB unique (ACCOUNTID)
+  using index 
+  tablespace CRT_IDX
+  pctfree 10
+  initrans 2
+  maxtrans 255
+  storage
+  (
+    initial 64K
+    next 1M
+    minextents 1
+    maxextents unlimited
+  )
+;
+create table ACCOUNTSFILE_CRT
+(
+  accountid       VARCHAR2(50),
+  typeid          VARCHAR2(112),
+  currencyid      VARCHAR2(333),
+  branchid        VARCHAR2(212),
+  isjoint         VARCHAR2(21),
+  openingdate     VARCHAR2(18),
+  nationalid      VARCHAR2(333),
+  secondaryid     VARCHAR2(150),
+  secondaryidtype VARCHAR2(112),
+  closingdate     VARCHAR2(18),
+  statusid        VARCHAR2(11),
+  statusreason    VARCHAR2(1000)
+)
+;
+alter table ACCOUNTSFILE_CRT
+  add constraint PK_ACCID_CRT unique (ACCOUNTID)
+  using index 
+  tablespace CRT_IDX
+  pctfree 10
+  initrans 2
+  maxtrans 255
+  storage
+  (
+    initial 64K
+    next 1M
+    minextents 1
+    maxextents unlimited
+  )
+  ;
+  create table ACCOUNTSFILE_CR
+(
+  accountid       VARCHAR2(50),
+  typeid          VARCHAR2(112),
+  currencyid      VARCHAR2(333),
+  branchid        VARCHAR2(212),
+  isjoint         VARCHAR2(21),
+  openingdate     VARCHAR2(18),
+  nationalid      VARCHAR2(333),
+  secondaryid     VARCHAR2(150),
+  secondaryidtype VARCHAR2(112),
+  closingdate     VARCHAR2(18),
+  statusid        VARCHAR2(11),
+  statusreason    VARCHAR2(1000)
+)
+;
+alter table ACCOUNTSFILE_CR
+  add constraint PK_ACCID304 unique (ACCOUNTID)
+  using index 
+  tablespace CRT_IDX
+  pctfree 10
+  initrans 2
+  maxtrans 255
+  storage
+  (
+    initial 64K
+    next 1M
+    minextents 1
+    maxextents unlimited
+  )

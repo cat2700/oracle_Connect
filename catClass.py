@@ -118,6 +118,31 @@ class mainClass:
         finally:
             self.close_connect()
 
+    def callProc(self, procName):
+        try:
+            if procName == '':
+                return False
+            else:
+                self.open_connect()
+                cursor = self.connection.cursor()
+                out = cursor.var(int)
+                cursor.callproc(procName,[out])
+                return True, out.getvalue()
+                # if SQLst.lstrip().lower()[:2] in ('se'):
+                #     cursor.execute(SQLst)
+                #     self.rows = cursor.fetchall()
+                #     self.rowsLen = len(self.rows)
+                # elif SQLst.lstrip().lower()[:2] in ('in', 'de'):
+                #     cursor.execute(SQLst)
+                #     self.connection.commit()
+                # elif SQLst.lstrip().lower()[:2] in ('dr', 'cr', 'be'):
+                #     cursor.execute(SQLst)
+                #     self.connection.commit()
+        except Exception as err:
+            return False, str(err), err.args
+        finally:
+            self.close_connect()
+
     def backupORRestore(self, isBackup=False, isrestore=False, restoreFile=''):
         try:
             if not self.open_connect() or (not isBackup and not isrestore) or (isrestore and restoreFile == ''):
@@ -1101,11 +1126,11 @@ class mainClass:
             print(False, str(err), err.args)
             return False
 
-    def readTXT(self, fileName):
+    def readTXT(self, fileName, splitChar=";"):
         try:
             cd = os.curdir + f"\\{fileName}.txt"
             rf = open(cd, 'r')
-            all = rf.read().strip().split(";")
+            all = rf.read().strip().split(splitChar)
             return all
         except Exception as err:
             return False
