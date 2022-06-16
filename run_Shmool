@@ -1,4 +1,3 @@
-
 import catClass
 # from datetime import datetime
 # import datetime
@@ -27,8 +26,8 @@ scriptDate = '31/05/2022'
 
 # ==>> Database Link
 seeList = [
-    ["SHMOOL", 2],
-    [f"ISLAMIC_{scriptDate.replace('/', '')}", 2]
+    ["SHMOOL", 1],
+    [f"ISLAMIC_{scriptDate.replace('/', '')}", 1]
 ]
 sql = list(cn.readTXT(fileName="shmoolDBLinks"))
 
@@ -37,6 +36,9 @@ for s in seeList:
     print(f'start with DB Link ==>>  (( {s[0]} ))')
     searchTBL = f"select count(*) from dba_objects_ae d where d.OBJECT_TYPE='DATABASE LINK' and d.OWNER=upper('{owner}') and d.OBJECT_NAME = upper('{s[0]}') "
     result = cn.runSQL(searchTBL)
+    if result[0] == False:
+        print(f"Error at Getting Data >> {result[1]} >> {result[2]}")
+        exit()
     st = int(s[1])  # store statments count
     if int(result[2][0][0]) == 0:  # chick if table exist
         print(f'Starting create {s[0]}')
@@ -67,8 +69,11 @@ sql = list(cn.readTXT(fileName="shmoolTBLs"))
 for s in seeList:
     # ['CUSTOMER_TAB_GOOD_SH', 3]
     print(f'start with table ==>>  (( {s[0]} ))')
-    searchTBL = f"SELECT count(*) FROM all_objects WHERE object_name = upper('{s[0]}') "
+    searchTBL = f"SELECT count(*) from dba_objects_ae d where d.OBJECT_TYPE='DATABASE LINK' and d.OWNER=upper('{owner}') and d.OBJECT_NAME = upper('{s[0]}') "
     result = cn.runSQL(searchTBL)
+    if result[0] == False:
+        print(f"Error at Getting Data >> {result[1]} >> {result[2]}")
+        exit()
     st = int(s[1])  # store statments count
     if int(result[2][0][0]) == 0:  # chick if table exist
         print(f'Starting create {s[0]}')
@@ -93,6 +98,9 @@ for s in seeList:
     print(f'start with column ==>>  (({s[0]} -> {s[1]} ))')
     searchTBL = f"SELECT count(*) FROM user_tab_cols c where c.TABLE_NAME=upper('{s[0]}') and c.COLUMN_NAME=upper('{s[1]}') "
     result = cn.runSQL(searchTBL)
+    if result[0] == False:
+        print(f"Error at Getting Data >> {result[1]} >> {result[2]}")
+        exit()
     st = int(s[2])  # store statments count
     if int(result[2][0][0]) == 0:  # chick if table exist
         print(f'Starting create {s[0]}')
@@ -107,7 +115,6 @@ for s in seeList:
         while st > 0:
             sql.pop(0)
             st = st - 1
-
 
 # ==>> Proc
 seeList = [
@@ -124,6 +131,9 @@ for s in seeList:
     print(f'start with Procedure ==>>  (( {s[0]} ))')
     searchTBL = f"select count(*) from dba_objects_ae d where d.OBJECT_TYPE='PROCEDURE' and d.OWNER=upper('{owner}') and d.OBJECT_NAME = upper('{s[0]}') "
     result = cn.runSQL(searchTBL)
+    if result[0] == False:
+        print(f"Error at Getting Data >> {result[1]} >> {result[2]}")
+        exit()
     st = int(s[1])  # store statments count
     if int(result[2][0][0]) == 0:  # chick if table exist
         print(f'Starting create {s[0]}')
@@ -139,11 +149,11 @@ for s in seeList:
             st = st - 1
 
 # =>> call procedure CIVIL_NO_CHK_SHMOL
-# g = cn.callProc('CIVIL_NO_CHK_SHMOL')
-# if g[0] == true:
-#     print(f'Procedure Return {g[1]}')
-# else:
-#     print(g)
+g = cn.callProc('CIVIL_NO_CHK_SHMOL')
+if g[0] == true:
+    print(f'Procedure Return {g[1]}')
+else:
+    print(g)
 
 # =>> View
 seeList = [
