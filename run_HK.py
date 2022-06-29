@@ -23,7 +23,7 @@ else:
 # ==> pip install cryptography
 
 
-dat = '31/05/2022'
+dat = '23/06/2022'
 wherecond = """
     where a.sub_branch_no in 
     (
@@ -338,6 +338,7 @@ sql = f"""
 
 start_time = time.time()
 
-cn.exportOrclExc(sql=sql, excelName='temp.xlsx', sheetName='shmol')
+cn.exportOrclExc(
+    sql=sql, excelName=f'{dat.replace(r"/", "")}.xlsx', sheetName='shmol')
 
 print(f"---{time.time() - start_time} seconds ---")
