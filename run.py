@@ -289,4 +289,15 @@ else:
 
 print(cn.open_connect())
 
+
+sql = """
+    select t.companyuniqueid, t.companyname, t.economicsectorisicl4, a4.act_nam_l, t.db_flag from cbe_company_cif_view_db t 
+    left join activ4_tab@shmool a4 on t.economicsectorisicl4 = a4.act_code4
+    where t.companyuniqueid is not null and t.companyname is not null
+    --and t.db_flag = 'not debit'
+
+"""
+cn.convertToXML(kind='company_cif', fromOrcl=True, sql=sql, maxRowsNum=500000)
+
+
 print(f"---{time.time() - start_time} seconds ---")

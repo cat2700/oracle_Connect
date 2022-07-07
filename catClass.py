@@ -126,7 +126,7 @@ class mainClass:
                 self.open_connect()
                 cursor = self.connection.cursor()
                 out = cursor.var(int)
-                cursor.callproc(procName,[out])
+                cursor.callproc(procName, [out])
                 return True, out.getvalue()
                 # if SQLst.lstrip().lower()[:2] in ('se'):
                 #     cursor.execute(SQLst)
@@ -504,6 +504,10 @@ class mainClass:
                        'accountId', 'openingDate', 'nationalId', 'secondaryId', 'secondaryIdType',
                        'parentCardId', 'parentNationalId', 'parentSecondryId', 'parentSecondryIdType',
                        'closingDate', 'statusId', 'statusReason']
+        elif kind.strip().lower() == 'company_cif':
+            rowlabel = ['corporates', 'corporate']
+            mapList = ['companyUniqueId',
+                       'companyName', 'economicsectorisicl4', 'economicsectorisicl4_name', 'db_flag']
         else:
             print('please kind attr. required')
             return
